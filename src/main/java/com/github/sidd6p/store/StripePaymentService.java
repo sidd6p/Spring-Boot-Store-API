@@ -22,6 +22,8 @@ public class StripePaymentService implements PaymentService {
     @Value("${stripe.timeout:5000}")
     private int timeout;
 
+    // Note: @Value can be used on fields, constructor/method parameters, or setter methods for injection.
+    // It CANNOT be used to inject values into local variables inside method bodies.
     @Value("${stripe.supportedCurrencies:USD,EUR}")
     private List<String> supportedCurrencies;
 

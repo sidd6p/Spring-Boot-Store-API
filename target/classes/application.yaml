@@ -12,3 +12,5 @@ stripe:
     - USD
     - EUR
     - GBP
+notification:
+  gateway: sms

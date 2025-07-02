@@ -1,5 +1,6 @@
 package com.github.sidd6p.store;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,7 +32,12 @@ public class Appconfig {
     }
 
     @Bean
-    public NotificationManager notificationManager() {
-        return new NotificationManager(email());
+    public NotificationManager notificationManager(@Value("${notification.gateway}") String notificationGateway) {
+        // FIXED: @Value cannot be used inside a method body. It should be used on method parameters or fields.
+        if ("sms".equals(notificationGateway)) {
+            return new NotificationManager(sms());
+        } else {
+            return new NotificationManager(email());
+        }
     }
 }
