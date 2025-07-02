@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 // dependency injection. It's a specialization of @Component that indicates this class contains
 // business logic. Spring will automatically detect and register this as a bean in the application context.
 // The "paypalPaymentService" value provides a specific name for this bean, useful when multiple implementations exist.
-@Service("paypalPaymentService")
+@Service("paypal")
 public class PayPalPayementService implements PaymentService {
 
     @Override

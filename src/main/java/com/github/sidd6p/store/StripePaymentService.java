@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("stripePaymentService")
+@Service("stripe")
 // @Primary annotation marks this bean as the preferred choice when multiple beans of the same type exist.
 // When Spring encounters multiple PaymentService implementations and no @Qualifier is specified,
 // it will automatically choose this StripePaymentService as the default implementation to inject.
 @Primary
 public class StripePaymentService implements PaymentService {
+    // @Value injects values from config files, env variables, or command-line args (env/args override config files)
     @Value("${stripe.apiUrl}")
     private String apiUrl;
 

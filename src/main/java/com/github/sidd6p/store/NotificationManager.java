@@ -2,7 +2,6 @@ package com.github.sidd6p.store;
 
 import org.springframework.stereotype.Service;
 
-@Service
 public class NotificationManager {
     private final NotificationService notificationService;
 

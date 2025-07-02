@@ -2,7 +2,6 @@ package com.github.sidd6p.store;
 
 import org.springframework.stereotype.Service;
 
-@Service("smsNotificationService")
 public class SMSNotificationService implements NotificationService {
     @Override
     public void sendNotification(String message) {

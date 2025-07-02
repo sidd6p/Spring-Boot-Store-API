@@ -11,7 +11,7 @@ public class OrderService {
     // @Qualifier annotation is used to specify which bean to inject when multiple implementations
     // of the same interface exist. Here, "paypalPaymentService" identifies the specific PaymentService implementation
     // to be injected, avoiding ambiguity when Spring tries to autowire the dependency.
-    public OrderService(@Qualifier("paypalPaymentService") PaymentService paymentService) {
+    public OrderService(@Qualifier("stripe") PaymentService paymentService) {
         this.paymentService = paymentService;
     }
     public void placeOrder() {

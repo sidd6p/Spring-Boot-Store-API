@@ -1,0 +1,14 @@
+# Spring Boot supports both application.yaml and application.properties for configuration.
+#   - application.yaml takes precedence over application.properties for overlapping properties.
+#   - Properties unique to application.properties will still be loaded if not present in application.yaml.
+spring:
+  application:
+    name: store
+stripe:
+  enabled: true
+  timeout: 1000
+  apiUrl: https://api.stripe.com
+  supportedCurrencies:
+    - USD
+    - EUR
+    - GBP
