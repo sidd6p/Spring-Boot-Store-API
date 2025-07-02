@@ -14,3 +14,7 @@ stripe:
     - GBP
 notification:
   gateway: sms
+email:
+    smtp:
+        hostUrl: https://smtp.example.com
+        port: 587

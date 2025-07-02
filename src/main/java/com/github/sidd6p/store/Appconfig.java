@@ -4,10 +4,7 @@ import com.github.sidd6p.store.notification.EmailNotificatonService;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.notification.SMSNotificationService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 
 /**
  * Appconfig.java: Spring {@link Configuration} class for defining beans for notification services and manager.
@@ -26,15 +23,16 @@ public class Appconfig {
      * The @Bean annotation tells Spring that a method instantiates, configures, and initializes a new object to be managed as a bean.
      * Beans are singletons by default and are injected wherever needed, enabling dependency injection (DI).
      */
-    @Bean
+    @Bean("email")
     public EmailNotificatonService email() {
         return new EmailNotificatonService();
     }
 
-    @Bean
+    @Bean("sms")
     public SMSNotificationService sms() {
         return new SMSNotificationService();
     }
+
 
     @Bean
     @Lazy // This annotation makes the bean lazy-initialized: it will only be created when first requested, not at application startup
