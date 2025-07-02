@@ -1,6 +1,6 @@
-package com.github.sidd6p.store;
+package com.github.sidd6p.store.notification;
 
-import org.springframework.stereotype.Service;
+import com.github.sidd6p.store.payement.NotificationService;
 
 public class NotificationManager {
     private final NotificationService notificationService;

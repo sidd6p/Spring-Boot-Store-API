@@ -1,7 +1,6 @@
-package com.github.sidd6p.store;
+package com.github.sidd6p.store.notification;
 
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
+import com.github.sidd6p.store.payement.NotificationService;
 
 public class EmailNotificatonService implements NotificationService {
 

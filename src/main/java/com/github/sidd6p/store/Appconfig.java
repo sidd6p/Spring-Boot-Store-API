@@ -1,5 +1,8 @@
 package com.github.sidd6p.store;
 
+import com.github.sidd6p.store.notification.EmailNotificatonService;
+import com.github.sidd6p.store.notification.NotificationManager;
+import com.github.sidd6p.store.notification.SMSNotificationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

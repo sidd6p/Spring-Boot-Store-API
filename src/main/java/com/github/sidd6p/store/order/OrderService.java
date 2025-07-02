@@ -1,9 +1,9 @@
-package com.github.sidd6p.store;
+package com.github.sidd6p.store.order;
 
+import com.github.sidd6p.store.payement.PaymentService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service

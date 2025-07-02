@@ -1,4 +1,4 @@
-package com.github.sidd6p.store;
+package com.github.sidd6p.store.payement;
 
 import org.springframework.stereotype.Service;
 
