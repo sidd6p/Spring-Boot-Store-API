@@ -1,5 +1,7 @@
 package com.github.sidd6p.store;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,17 @@ public class OrderService {
         this.paymentService = paymentService;
         System.out.println("Order service created");
     }
+
+    @PostConstruct
+    public void init(){
+        System.out.println("Order service initialized");
+    }
+
+    @PreDestroy
+    public void cleanUp() {
+        System.out.println("Cleaning up resources in OrderService");
+    }
+
     public void placeOrder() {
         paymentService.processPayment(100.0);
         System.out.println("Order has been placed successfully.");
