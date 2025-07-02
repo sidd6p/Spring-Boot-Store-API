@@ -1,8 +1,20 @@
 package com.github.sidd6p.store;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+@Service
 public class OrderService {
+    private final PaymentService paymentService;
+
+    // @Qualifier annotation is used to specify which bean to inject when multiple implementations
+    // of the same interface exist. Here, "paypal" identifies the specific PaymentService implementation
+    // to be injected, avoiding ambiguity when Spring tries to autowire the dependency.
+    public OrderService(@Qualifier("paypal") PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
     public void placeOrder() {
-        var paymentService = new StripePaymentService();
         paymentService.processPayment(100.0);
         System.out.println("Order has been placed successfully.");
     }
