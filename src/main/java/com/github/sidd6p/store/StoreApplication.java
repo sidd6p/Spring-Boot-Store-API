@@ -11,8 +11,9 @@ public class StoreApplication {
 
 		ApplicationContext context = SpringApplication.run(StoreApplication.class, args);
 		var orderService = context.getBean(OrderService.class);
-		var notificationManager = context.getBean(NotificationManager.class);
 		orderService.placeOrder();
+
+		var notificationManager = context.getBean(NotificationManager.class);
 		notificationManager.notify("Order notification sent successfully!");
 	}
 

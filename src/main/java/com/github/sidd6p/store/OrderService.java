@@ -13,6 +13,7 @@ public class OrderService {
     // to be injected, avoiding ambiguity when Spring tries to autowire the dependency.
     public OrderService(@Qualifier("stripe") PaymentService paymentService) {
         this.paymentService = paymentService;
+        System.out.println("Order service created");
     }
     public void placeOrder() {
         paymentService.processPayment(100.0);

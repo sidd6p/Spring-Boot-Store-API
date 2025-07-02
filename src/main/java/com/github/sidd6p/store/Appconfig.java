@@ -3,6 +3,7 @@ package com.github.sidd6p.store;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * Appconfig.java: Spring {@link Configuration} class for defining beans for notification services and manager.
@@ -32,6 +33,7 @@ public class Appconfig {
     }
 
     @Bean
+    @Lazy // This annotation makes the bean lazy-initialized: it will only be created when first requested, not at application startup
     public NotificationManager notificationManager(@Value("${notification.gateway}") String notificationGateway) {
         // FIXED: @Value cannot be used inside a method body. It should be used on method parameters or fields.
         if ("sms".equals(notificationGateway)) {
