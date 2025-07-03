@@ -1,9 +1,8 @@
 package com.github.sidd6p.store;
 
+import com.github.sidd6p.store.models.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
-import com.github.sidd6p.store.user.User;
-import com.github.sidd6p.store.user.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -30,9 +29,23 @@ public class StoreApplication {
 //		notificationManager.notify("Order placed successfully!", "siddpurwar@gmail.com");
 //		notificationManager2.notify("Order placed successfully!", "siddpurwar@gmail.com");
 
-		var userService = context.getBean(UserService.class);
-		User newUser = new User(123131, "Siddhartha", "siddpurwar@gmail.com", "fghjj@feds");
-		userService.registerUser(newUser);
+		var user1 = new User();
+		user1.setEmail("siddpurwar@gmail.com");
+		System.out.println("User1: " + user1);
+
+		var user2 = new User(null, null, "siddpurwar6@gmail.com", null);
+		System.out.println("User2: " + user2);
+
+		// We are not using the 'new' keyword here because Lombok's @Builder generates a builder() method.
+		// The builder pattern provides a flexible and readable way to construct objects, especially with many fields.
+		// Instead of calling a constructor directly, we use User.builder()...build() to set properties fluently and create the object.
+		var user3 = User.builder()
+			.id(3L)
+			.name("John Doe")
+			.email("john.doe@example.com")
+			.password("password123")
+			.build();
+		System.out.println("User3: " + user3);
 
 
 //		context.close(); // This closes the application context, releasing all resources and beans managed by Spring.
