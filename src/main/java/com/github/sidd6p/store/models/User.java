@@ -17,12 +17,13 @@ public class User {
 
     @Id // Marks this field as the primary key of the entity
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Specifies how the primary key should be generated (auto-incremented by the database)
+    @Column(name = "id") // JPA: maps this field to a column in the database table
     private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true) // JPA: maps this field to a column in the database table
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
