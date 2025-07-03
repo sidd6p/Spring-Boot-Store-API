@@ -12,4 +12,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      # Mount local initialization scripts to MySQL container's entrypoint directory
+      # This allows SQL scripts in ./docker/mysql/docker-entrypoint-initdb.d/ to be
+      # automatically executed when the MySQL container starts up for database initialization
       - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
