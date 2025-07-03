@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: my-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: G4@sdvdvf#vgtb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: vtgbD#qvgbGB2
+      MYSQL_DATABASE: store_api
+    ports:
+      - "3306:3306"
