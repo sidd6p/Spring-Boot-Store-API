@@ -1,19 +1,59 @@
+# Ignore environment variable files
+.env
+.env.*
+
+# Maven build output
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE/project files
+.idea/
+*.iws
+*.iml
+*.ipr
+.classpath
+.project
+.settings/
+.factorypath
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
 # MAC files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
-# Compiled class file
+# Windows system files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
+logs/
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -22,6 +62,23 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Spring Boot specific
+*.pid
+*.out
+
+# Backup and temp files
+*~
+*.swp
+*.bak
+*.tmp
+*.orig
+
+# JVM Crash logs
 hs_err_pid*
-replay_pid*
+
+# Ignore store.zip archive
+store.zip
+
+# Docker compose override files
+docker-compose.override.yml
+docker-compose.override.yaml
