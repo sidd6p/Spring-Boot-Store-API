@@ -3,6 +3,9 @@ package com.github.sidd6p.store.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Builder  // Lombok: generates a builder pattern implementation for the class
 @Setter // Lombok: generates setter methods for all fields
@@ -20,15 +23,28 @@ public class User {
     @Column(name = "id") // JPA: maps this field to a column in the database table
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = true)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = true)
     private String password;
 
+    @OneToMany(mappedBy = "user")
+    @Builder.Default // Lombok: initializes the addresses list to an empty ArrayList by default
+    private List<Address> addresses = new ArrayList<>();
+
+    public void addAddress(Address address) {
+        addresses.add(address);
+        address.setUser(this);
+    }
+
+    public void removeAddress(Address address) {
+        addresses.remove(address);
+        address.setUser(null); // Clear the user reference in the address
+    }
 
     @Override
     public String toString() {
@@ -36,6 +52,7 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
+                ", addresses=" + addresses +
                 '}';
     }
 }

@@ -1,11 +1,14 @@
 package com.github.sidd6p.store;
 
+import com.github.sidd6p.store.models.Address;
 import com.github.sidd6p.store.models.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.ArrayList;
 
 @SpringBootApplication
 public class StoreApplication {
@@ -33,7 +36,7 @@ public class StoreApplication {
 		user1.setEmail("siddpurwar@gmail.com");
 		System.out.println("User1: " + user1);
 
-		var user2 = new User(null, null, "siddpurwar6@gmail.com", null);
+		var user2 = new User(null, null, "siddpurwar6@gmail.com", null, new ArrayList<>());
 		System.out.println("User2: " + user2);
 
 		// We are not using the 'new' keyword here because Lombok's @Builder generates a builder() method.
@@ -45,8 +48,17 @@ public class StoreApplication {
 			.email("john.doe@example.com")
 			.password("password123")
 			.build();
+		var address1 = Address.builder()
+				.id(1L)
+				.zip("12345")
+				.city("New York")
+				.street("123 Main St")
+				.user(user3)
+				.build();
+		user3.addAddress(address1);
 		System.out.println("User3: " + user3);
-
+		user3.removeAddress(address1);
+		System.out.println("User3: " + user3);
 
 //		context.close(); // This closes the application context, releasing all resources and beans managed by Spring.
 	}

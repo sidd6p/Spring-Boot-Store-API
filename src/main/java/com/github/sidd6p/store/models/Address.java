@@ -4,8 +4,13 @@ package com.github.sidd6p.store.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
+@ToString
 @Setter
+@Entity
 @Table(name = "addresses")
 public class Address {
 
@@ -22,17 +27,14 @@ public class Address {
     @Column(name = "street", nullable = false)
     private String street;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
 
-    @Override
-    public String toString() {
-        return "Address{" +
-                "id=" + id +
-                ", city='" + city + '\'' +
-                ", zip='" + zip + '\'' +
-                ", street='" + street + '\'' +
-                ", userId=" + userId +
-                '}';
-    }
+    // Lombok's @ToString generates a toString() method including all fields by default.
+    // We use @ToString.Exclude on the 'user' field to prevent potential infinite recursion
+    // when Address and User reference each other (bi-directional relationship).
+    // This avoids stack overflow errors and keeps the toString() output concise.
+    @ManyToOne()
+    @ToString.Exclude
+    @JoinColumn(name = "user_id")
+    private User user;
+
 }
