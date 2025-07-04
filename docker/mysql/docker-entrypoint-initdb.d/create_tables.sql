@@ -51,3 +51,22 @@ CREATE TABLE
                     CONSTRAINT `user_tags_relation_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
                     CONSTRAINT `user_tags_relation_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE
+    `categories` (
+                     `id` int unsigned NOT NULL AUTO_INCREMENT,
+                     `name` varchar(255) NOT NULL,
+                     PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE
+    `products` (
+                   `id` int unsigned NOT NULL AUTO_INCREMENT,
+                   `name` varchar(255) NOT NULL,
+                   `price` decimal(10, 0) NOT NULL,
+                   `category_id` int unsigned DEFAULT NULL,
+                   PRIMARY KEY (`id`),
+                   KEY `products_relation_1` (`category_id`),
+                   CONSTRAINT `products_relation_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
