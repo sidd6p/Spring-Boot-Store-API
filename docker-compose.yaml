@@ -10,7 +10,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: store_api
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Map host port 3307 to container port 3306
     volumes:
       # Mount local initialization scripts to MySQL container's entrypoint directory
       # This allows SQL scripts in ./docker/mysql/docker-entrypoint-initdb.d/ to be
