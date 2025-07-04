@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Builder  // Lombok: generates a builder pattern implementation for the class
@@ -46,6 +48,28 @@ public class User {
         address.setUser(null); // Clear the user reference in the address
     }
 
+
+    @ManyToMany()
+    @JoinTable(
+            name = "user_tags", // Join table name
+            joinColumns = @JoinColumn(name = "user_id"), // Foreign key column for User
+            inverseJoinColumns = @JoinColumn(name = "tag_id") // Foreign key column for Tag
+    )
+    @Builder.Default
+    private Set<Tag> tags = new HashSet<>();
+
+   public void addTag(Tag tag) {
+        tags.add(tag);
+        tag.getUsers().add(this); // Ensure the reverse relationship is maintained
+    }
+    public void removeTag(Tag tag) {
+        tags.remove(tag);
+        tag.getUsers().remove(this); // Ensure the reverse relationship is maintained
+    }
+
+
+
+
     @Override
     public String toString() {
         return "User{" +
@@ -53,6 +77,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", addresses=" + addresses +
+                ", tags=" + tags +
                 '}';
     }
 }
