@@ -67,6 +67,9 @@ public class User {
         tag.getUsers().remove(this); // Ensure the reverse relationship is maintained
     }
 
+    @OneToOne(mappedBy = "user")
+    private Profile profile;
+
 
 
 
@@ -78,6 +81,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", addresses=" + addresses +
                 ", tags=" + tags +
+                ", profile=" + profile +
                 '}';
     }
 }

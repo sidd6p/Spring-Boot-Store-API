@@ -1,6 +1,7 @@
 package com.github.sidd6p.store;
 
 import com.github.sidd6p.store.models.Address;
+import com.github.sidd6p.store.models.Profile;
 import com.github.sidd6p.store.models.Tag;
 import com.github.sidd6p.store.models.User;
 import com.github.sidd6p.store.notification.NotificationManager;
@@ -38,7 +39,7 @@ public class StoreApplication {
 		user1.setEmail("siddpurwar@gmail.com");
 		System.out.println("User1: " + user1);
 
-		var user2 = new User(null, null, "siddpurwar6@gmail.com", null, new ArrayList<>(), new HashSet<>());
+		var user2 = new User(null, null, "siddpurwar6@gmail.com", null, new ArrayList<>(), new HashSet<>(), null);
 		System.out.println("User2: " + user2);
 
 		// We are not using the 'new' keyword here because Lombok's @Builder generates a builder() method.
@@ -69,6 +70,19 @@ public class StoreApplication {
 		user1.removeTag(tag1);
 		System.out.println("User1: " + user1);
 
+
+		var profile = Profile.builder()
+				.id(1L)
+				.bio("This is a sample bio.")
+				.phoneNumber("123-456-7890")
+				.dateOfBirth(java.sql.Date.valueOf("1990-01-01"))
+				.user(user1)
+				.loyaltyPoints(100)
+				.build();
+
+		user2.setProfile(profile);
+		profile.setUser(user2);
+		System.out.println("User2: " + user2);
 
 
 //		context.close(); // This closes the application context, releasing all resources and beans managed by Spring.

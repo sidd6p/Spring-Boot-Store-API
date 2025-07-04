@@ -1,9 +1,12 @@
 package com.github.sidd6p.store.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 @Getter
 @Setter
 @Entity
@@ -23,6 +26,12 @@ public class Profile {
 
     @Column(name = "date_of_birth")
     private java.sql.Date dateOfBirth;
+
+    @OneToOne()
+    @JoinColumn(name = "id")
+    @MapsId
+    @ToString.Exclude
+    private User user;
 
     // columnDefinition specifies the exact SQL fragment used when generating the DDL for this column.
     // Here, it ensures the loyalty_points column is UNSIGNED and defaults to 0 in the database.
