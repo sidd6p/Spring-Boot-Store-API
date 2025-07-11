@@ -4,10 +4,17 @@
 spring:
   application:
     name: store
-datasource:
-  url: jdbc:mysql://localhost:3306/store_api?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-  username: ${MYSQL_USER}
-  password: ${MYSQL_PASSWORD}
+  datasource:
+    url: jdbc:mysql://localhost:3307/store_api?createDatabaseIfNotExist=true&useSSL=false
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    show-sql: true  # Show SQL statements in the console for debugging
+    hibernate:
+      ddl-auto: validate  # Only validate the database schema with entity; do not create, update, or drop tables. Fails if schema mismatches entities.
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect  # Use MySQL-specific SQL dialect
 stripe:
   enabled: true
   timeout: 1000

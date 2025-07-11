@@ -6,6 +6,7 @@ import com.github.sidd6p.store.entities.Tag;
 import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
+import com.github.sidd6p.store.repositories.UserRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -17,10 +18,23 @@ import java.util.HashSet;
 public class StoreApplication {
 
 	public static void main(String[] args) {
-
-		// ConfigurableApplicationContext gives us more options to interact with the application context, such as closing the context or registering shutdown hooks. It extends ApplicationContext, providing additional configuration and lifecycle management methods.
 		ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
+//		executeStoreOperations(context);
+		executeRepositoryOperations(context);
+	}
 
+	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
+		var userRepository = context.getBean(UserRepository.class);
+		var user1 = User.builder()
+				.name("Siddharth Purwar")
+				.email("siddpurwar@gmail.com")
+				.password("Siddharth")
+				.build();
+		userRepository.save(user1);
+
+	}
+
+	public static void executeStoreOperations(ConfigurableApplicationContext context) {
 		// Even though we call getBean(OrderService.class) twice, Spring returns the same instance
 		// because OrderService is a singleton-scoped bean by default.
 		var orderService = context.getBean(OrderManager.class);
@@ -46,13 +60,11 @@ public class StoreApplication {
 		// The builder pattern provides a flexible and readable way to construct objects, especially with many fields.
 		// Instead of calling a constructor directly, we use User.builder()...build() to set properties fluently and create the object.
 		var user3 = User.builder()
-			.id(3L)
 			.name("John Doe")
 			.email("john.doe@example.com")
 			.password("password123")
 			.build();
 		var address1 = Address.builder()
-				.id(1L)
 				.zip("12345")
 				.city("New York")
 				.street("123 Main St")
@@ -72,7 +84,6 @@ public class StoreApplication {
 
 
 		var profile = Profile.builder()
-				.id(1L)
 				.bio("This is a sample bio.")
 				.phoneNumber("123-456-7890")
 				.dateOfBirth(java.sql.Date.valueOf("1990-01-01"))
@@ -83,6 +94,8 @@ public class StoreApplication {
 		user2.setProfile(profile);
 		profile.setUser(user2);
 		System.out.println("User2: " + user2);
+
+
 
 
 //		context.close(); // This closes the application context, releasing all resources and beans managed by Spring.

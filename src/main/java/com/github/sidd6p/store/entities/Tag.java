@@ -16,7 +16,7 @@ import java.util.Set;
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", columnDefinition = "int UNSIGNED")
     private Long id;
 
     public Tag(String name) {
