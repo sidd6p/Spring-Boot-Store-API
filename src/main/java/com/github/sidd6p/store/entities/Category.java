@@ -1,5 +1,4 @@
-package com.github.sidd6p.store.models;
-
+package com.github.sidd6p.store.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,11 +14,13 @@ import java.util.Set;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", columnDefinition = "int UNSIGNED")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
     @OneToMany(mappedBy = "category")
     private Set<Product> products = new HashSet<>();
+
 }

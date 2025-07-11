@@ -1,4 +1,4 @@
-package com.github.sidd6p.store.models;
+package com.github.sidd6p.store.entities;
 
 
 import jakarta.persistence.*;
