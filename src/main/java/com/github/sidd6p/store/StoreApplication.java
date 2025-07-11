@@ -24,13 +24,37 @@ public class StoreApplication {
 	}
 
 	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
+		/*
+		   Spring Data JPA uses a powerful mechanism to provide repository implementations at runtime.
+		   When you define an interface like UserRepository, you do not need to provide its implementation.
+		   At application startup, Spring scans for repository interfaces and automatically creates a proxy class that implements these interfaces.
+		   This proxy class is generated dynamically and contains the logic to handle all the repository methods (like save, findAll, etc.) by delegating them to the underlying JPA EntityManager.
+		   When you request the UserRepository bean from the Spring context, you receive an instance of this proxy class (the proxy object).
+		   Any method call you make (such as save()) is intercepted by the proxy, which then executes the appropriate database operation.
+		   This approach allows you to work with repositories as if they were regular objects, while Spring handles all the implementation details behind the scenes.
+		*/
+		// Get the UserRepository bean from the Spring context. This is a proxy object created by Spring at runtime.
 		var userRepository = context.getBean(UserRepository.class);
+
+		// Print the proxy object. This is the actual instance returned by Spring, which implements the UserRepository interface.
+		System.out.println("Proxy object: " + userRepository);
+
+		// Print the proxy class. This shows the dynamically generated class that Spring uses to implement the interface.
+		System.out.println("Proxy class: " + userRepository.getClass());
+
+		// Print the methods declared in the proxy class. These are the methods you can call on the repository.
+		System.out.println("Proxy methods: " + java.util.Arrays.toString(userRepository.getClass().getDeclaredMethods()));
+
 		var user1 = User.builder()
 				.name("Siddharth Purwar")
 				.email("siddpurwar@gmail.com")
 				.password("Siddharth")
 				.build();
 		userRepository.save(user1);
+		var id1 = user1.getId();
+		System.out.println("Proxy id1: " + id1);
+		System.out.println(userRepository.findById(id1).orElse(null));
+
 
 	}
 
