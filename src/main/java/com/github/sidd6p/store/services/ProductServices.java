@@ -16,4 +16,7 @@ public class ProductServices {
         productRepository.findByNameContainingIgnoreCase(name).forEach(System.out::println);
     }
 
+    public void findByIDBetweenOrderbyName(Long startId, Long endId) {
+        productRepository.findByIDBetweenOrderbyName(startId, endId).forEach(System.out::println);
+    }
 }

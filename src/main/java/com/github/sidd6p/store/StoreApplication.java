@@ -42,6 +42,7 @@ public class StoreApplication {
 	public static void executeProductServices(ConfigurableApplicationContext context) {
 		var productServices = context.getBean(ProductServices.class);
 		productServices.find("aptop");
+		productServices.findByIDBetweenOrderbyName(1L, 10L);
 	}
 
 
