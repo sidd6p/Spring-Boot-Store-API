@@ -47,6 +47,7 @@ public class StoreApplication {
 		productServices.findProductsByPriceRange(new BigDecimal("1000.0"), new BigDecimal("5000.0"));
 		productServices.findByExample();
 		productServices.fetchSortedProductsByPrice();
+		productServices.fetchPaginatedProducts(0, 5);
 	}
 
 

@@ -4,6 +4,8 @@ import com.github.sidd6p.store.entities.Product;
 import com.github.sidd6p.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +49,17 @@ public class ProductServices {
 
     public void fetchSortedProductsByPrice() {
         var sort = Sort.by(Sort.Direction.ASC, "price").and(Sort.by(Sort.Direction.DESC, "name"));
-        productRepository.findAll(sort).forEach(System.out::println);
+        List<Product> products = productRepository.findAll(sort);
+        products.forEach(System.out::println);
+    }
 
+    public void fetchPaginatedProducts(int page, int size) {
+        var pageable = PageRequest.of(page, size);
+        Page<Product> productPage = productRepository.findAll(pageable);
+        System.out.println("Total Pages: " + productPage.getTotalPages());
+        System.out.println("Total Elements: " + productPage.getTotalElements());
+        System.out.println("Current Page: " + productPage.getNumber());
+        System.out.println("Page Size: " + productPage.getSize());
+        productPage.getContent().forEach(System.out::println);
     }
 }
