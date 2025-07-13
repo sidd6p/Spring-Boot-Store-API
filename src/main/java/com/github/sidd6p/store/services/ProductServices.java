@@ -4,6 +4,7 @@ import com.github.sidd6p.store.entities.Product;
 import com.github.sidd6p.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -42,5 +43,11 @@ public class ProductServices {
 
         // Execute the query - finds all products matching the probe's criteria
         productRepository.findAll(example).forEach(System.out::println);
+    }
+
+    public void fetchSortedProductsByPrice() {
+        var sort = Sort.by(Sort.Direction.ASC, "price").and(Sort.by(Sort.Direction.DESC, "name"));
+        productRepository.findAll(sort).forEach(System.out::println);
+
     }
 }
