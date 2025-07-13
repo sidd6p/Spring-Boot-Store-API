@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.services;
 
+import com.github.sidd6p.store.entities.Address;
 import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.repositories.AddressRepository;
 import com.github.sidd6p.store.repositories.ProfileRepository;
@@ -56,5 +57,28 @@ public class UserServices {
 
     public void fetchAddress() {
         addressRepository.findById(1L).ifPresent(System.out::println);
+    }
+
+    /**
+     * The @Transactional annotation is used here to ensure that the persistence of the User and Address entities,
+     * as well as the management of their relationship, occurs within a single database transaction. This guarantees
+     * atomicity and consistency, so that either all changes are committed together or none are, preventing partial updates
+     * in case of an error. It is especially important when persisting related entities and their associations.
+     */
+    @Transactional
+    public void persistRelated() {
+        var user = User.builder()
+                .name("Siddharth Purwar")
+                .email("siddpurwar@gmail.com")
+                .password("Siddharth")
+                .build();
+        var address = Address.builder()
+                .city("Delhi")
+                .zip("110001")
+                .street("Delhi")
+                .build();
+        user.addAddress(address);
+        userRepository.save(user);
+
     }
 }

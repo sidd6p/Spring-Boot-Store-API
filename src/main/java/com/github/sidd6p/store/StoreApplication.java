@@ -26,7 +26,7 @@ public class StoreApplication {
 		ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
 //		executeStoreOperations(context);
 //		executeRepositoryOperations(context);
-//		execureUserServices(context);
+		execureUserServices(context);
 	}
 
 
@@ -35,6 +35,7 @@ public class StoreApplication {
 		userServices.showEntityStates();
 		userServices.showRelatedEntities();
 		userServices.fetchAddress();
+		userServices.persistRelated();
 	}
 
 	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
