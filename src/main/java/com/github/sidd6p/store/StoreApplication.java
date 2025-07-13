@@ -7,9 +7,8 @@ import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import com.github.sidd6p.store.repositories.UserRepository;
+import com.github.sidd6p.store.services.ProductServices;
 import com.github.sidd6p.store.services.UserServices;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -26,11 +25,12 @@ public class StoreApplication {
 		ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
 //		executeStoreOperations(context);
 //		executeRepositoryOperations(context);
-		execureUserServices(context);
+//		executeUserServices(context);
+		executeProductServices(context);
 	}
 
 
-	public static void execureUserServices(ConfigurableApplicationContext context) {
+	public static void executeUserServices(ConfigurableApplicationContext context) {
 		var userServices = context.getBean(UserServices.class);
 		userServices.showEntityStates();
 		userServices.showRelatedEntities();
@@ -38,6 +38,12 @@ public class StoreApplication {
 		userServices.persistRelated();
 		userServices.deleteRelated();
 	}
+
+	public static void executeProductServices(ConfigurableApplicationContext context) {
+		var productServices = context.getBean(ProductServices.class);
+		productServices.find("aptop");
+	}
+
 
 	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
 		/*

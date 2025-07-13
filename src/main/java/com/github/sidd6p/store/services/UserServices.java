@@ -2,13 +2,12 @@ package com.github.sidd6p.store.services;
 
 import com.github.sidd6p.store.entities.Address;
 import com.github.sidd6p.store.entities.User;
-import com.github.sidd6p.store.repositories.AddressRepository;
-import com.github.sidd6p.store.repositories.ProfileRepository;
-import com.github.sidd6p.store.repositories.UserRepository;
+import com.github.sidd6p.store.repositories.*;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
 
 
 @Service
@@ -82,6 +81,9 @@ public class UserServices {
     }
 
     public void deleteRelated() {
-        userRepository.findById(1L).ifPresent(userRepository::delete);
+        userRepository.findById(1L).ifPresent(user -> {;
+            addressRepository.deleteAll(user.getAddresses());
+            userRepository.delete(user);
+        });
     }
 }
