@@ -70,3 +70,23 @@ CREATE TABLE
                    KEY `products_relation_1` (`category_id`),
                    CONSTRAINT `products_relation_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+
+DELIMITER //
+
+CREATE PROCEDURE FindProductsByPrice(
+    IN min_price DECIMAL(10,2),
+    IN max_price DECIMAL(10,2)
+)
+BEGIN
+    SELECT
+        p.id,
+        p.name,
+        p.price,
+        p.category_id
+    FROM products p
+    WHERE p.price BETWEEN min_price AND max_price
+    ORDER BY p.name ASC;
+END //
+
+DELIMITER ;

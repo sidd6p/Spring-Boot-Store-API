@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-public interface ProductRepository extends CrudRepository<Product, Long> {
+public interface ProductRepository extends CrudRepository<Product, Integer> {
 
     // This method uses Spring Data JPA's query derivation mechanism.
     // The method name "findByNameContainingIgnoreCase" tells Spring to generate a query that finds all products
@@ -16,6 +17,9 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
     List<Product> findByNameContainingIgnoreCase(String name);
 
     @Query(value = "SELECT * FROM products p WHERE p.id BETWEEN :min AND :max ORDER BY p.name", nativeQuery = true)
-    List<Product> findByIDBetweenOrderbyName(@Param("min") Long startId, @Param("max") Long endId);
+    List<Product> findByIDBetweenOrderbyName(@Param("min") Integer startId, @Param("max") Integer endId);
+
+    @Query(value = "CALL FindProductsByPrice(:minPrice, :maxPrice)", nativeQuery = true)
+    List<Product> findProductsByPriceRange(@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice);
 
 }

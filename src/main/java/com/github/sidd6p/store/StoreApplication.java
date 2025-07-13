@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,8 @@ public class StoreApplication {
 	public static void executeProductServices(ConfigurableApplicationContext context) {
 		var productServices = context.getBean(ProductServices.class);
 		productServices.find("aptop");
-		productServices.findByIDBetweenOrderbyName(1L, 10L);
+		productServices.findByIDBetweenOrderbyName(1, 10);
+		productServices.findProductsByPriceRange(new BigDecimal("1000.0"), new BigDecimal("5000.0"));
 	}
 
 

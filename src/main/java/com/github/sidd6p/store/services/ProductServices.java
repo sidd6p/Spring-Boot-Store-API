@@ -5,6 +5,7 @@ import com.github.sidd6p.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,7 +17,11 @@ public class ProductServices {
         productRepository.findByNameContainingIgnoreCase(name).forEach(System.out::println);
     }
 
-    public void findByIDBetweenOrderbyName(Long startId, Long endId) {
+    public void findByIDBetweenOrderbyName(Integer startId, Integer endId) {
         productRepository.findByIDBetweenOrderbyName(startId, endId).forEach(System.out::println);
+    }
+
+    public void findProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+        productRepository.findProductsByPriceRange(minPrice, maxPrice).forEach(System.out::println);
     }
 }
