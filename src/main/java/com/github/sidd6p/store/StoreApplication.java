@@ -36,6 +36,7 @@ public class StoreApplication {
 		userServices.showRelatedEntities();
 		userServices.fetchAddress();
 		userServices.persistRelated();
+		userServices.deleteRelated();
 	}
 
 	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {

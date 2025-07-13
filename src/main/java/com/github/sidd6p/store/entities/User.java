@@ -34,7 +34,10 @@ public class User {
     @Column(name = "password", nullable = true)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade =  CascadeType.PERSIST)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    // CascadeType.PERSIST: When saving a User, also save its Addresses.
+    // CascadeType.REMOVE: When deleting a User, also delete its Addresses.
+    // orphanRemoval = true: When removing an Address from the addresses list, delete it from the database even if the User is not deleted.
     @Builder.Default // Lombok: initializes the addresses list to an empty ArrayList by default
     private List<Address> addresses = new ArrayList<>();
 
@@ -67,7 +70,7 @@ public class User {
         tag.getUsers().remove(this); // Ensure the reverse relationship is maintained
     }
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Profile profile;
 
 

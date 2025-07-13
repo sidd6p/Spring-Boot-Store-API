@@ -79,6 +79,9 @@ public class UserServices {
                 .build();
         user.addAddress(address);
         userRepository.save(user);
+    }
 
+    public void deleteRelated() {
+        userRepository.findById(1L).ifPresent(userRepository::delete);
     }
 }
