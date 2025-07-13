@@ -7,11 +7,15 @@ import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import com.github.sidd6p.store.repositories.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 @SpringBootApplication
@@ -20,7 +24,45 @@ public class StoreApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
 //		executeStoreOperations(context);
-		executeRepositoryOperations(context);
+//		executeRepositoryOperations(context);
+		showStates(context);
+	}
+
+	/**
+	 * The showStates function demonstrates the concept of JPA entity states (transient, managed/persistent, detached)
+	 * by checking if a User entity is managed by the EntityManager before and after saving it.
+	 *
+	 * The @Transactional annotation is used to define a transactional boundary, ensuring that all operations
+	 * within the method are executed within a single database transaction. This is important for operations
+	 * that require atomicity and consistency, such as multiple database updates or lazy loading of entities.
+	 *
+	 * In this example, @Transactional is commented out because it cannot be used on static methods.
+	 * Spring's @Transactional only works on instance methods managed by the Spring container.
+	 * If you uncomment @Transactional here, it will have no effect and may cause configuration issues.
+	 */
+//	@Transactional
+	public static void showStates(ConfigurableApplicationContext context) {
+		var userRepository = context.getBean(UserRepository.class);
+		EntityManager entityManager = context.getBean(EntityManager.class);
+		var user1 = User.builder()
+				.name("Siddharth Purwar")
+				.email("siddpurwar@gmail.com")
+				.password("Siddharth")
+				.build();
+
+		if (entityManager.contains(user1)) {
+			System.out.println("User1 is in the managed/persistent state.");
+		} else {
+			System.out.println("User1 is in the transient/detached state.");
+		}
+		userRepository.save(user1);
+		if (entityManager.contains(user1)) {
+			System.out.println("User1 is in the managed/persistent state after save.");
+		} else {
+			System.out.println("User1 is in the transient/detached state after save.");
+		}
+
+
 	}
 
 	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
@@ -43,7 +85,7 @@ public class StoreApplication {
 		System.out.println("Proxy class: " + userRepository.getClass());
 
 		// Print the methods declared in the proxy class. These are the methods you can call on the repository.
-		System.out.println("Proxy methods: " + java.util.Arrays.toString(userRepository.getClass().getDeclaredMethods()));
+		System.out.println("Proxy methods: " + Arrays.toString(userRepository.getClass().getDeclaredMethods()));
 
 		var user1 = User.builder()
 				.name("Siddharth Purwar")
@@ -54,6 +96,8 @@ public class StoreApplication {
 		var id1 = user1.getId();
 		System.out.println("Proxy id1: " + id1);
 		System.out.println(userRepository.findById(id1).orElse(null));
+		userRepository.findAll().forEach(System.out::println);
+		userRepository.deleteById(id1);
 
 
 	}
@@ -110,7 +154,7 @@ public class StoreApplication {
 		var profile = Profile.builder()
 				.bio("This is a sample bio.")
 				.phoneNumber("123-456-7890")
-				.dateOfBirth(java.sql.Date.valueOf("1990-01-01"))
+				.dateOfBirth(Date.valueOf("1990-01-01"))
 				.user(user1)
 				.loyaltyPoints(100)
 				.build();
