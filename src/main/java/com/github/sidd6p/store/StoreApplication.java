@@ -7,6 +7,7 @@ import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import com.github.sidd6p.store.repositories.UserRepository;
+import com.github.sidd6p.store.services.UserServices;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.SpringApplication;
@@ -25,44 +26,15 @@ public class StoreApplication {
 		ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
 //		executeStoreOperations(context);
 //		executeRepositoryOperations(context);
-		showStates(context);
+//		execureUserServices(context);
 	}
 
-	/**
-	 * The showStates function demonstrates the concept of JPA entity states (transient, managed/persistent, detached)
-	 * by checking if a User entity is managed by the EntityManager before and after saving it.
-	 *
-	 * The @Transactional annotation is used to define a transactional boundary, ensuring that all operations
-	 * within the method are executed within a single database transaction. This is important for operations
-	 * that require atomicity and consistency, such as multiple database updates or lazy loading of entities.
-	 *
-	 * In this example, @Transactional is commented out because it cannot be used on static methods.
-	 * Spring's @Transactional only works on instance methods managed by the Spring container.
-	 * If you uncomment @Transactional here, it will have no effect and may cause configuration issues.
-	 */
-//	@Transactional
-	public static void showStates(ConfigurableApplicationContext context) {
-		var userRepository = context.getBean(UserRepository.class);
-		EntityManager entityManager = context.getBean(EntityManager.class);
-		var user1 = User.builder()
-				.name("Siddharth Purwar")
-				.email("siddpurwar@gmail.com")
-				.password("Siddharth")
-				.build();
 
-		if (entityManager.contains(user1)) {
-			System.out.println("User1 is in the managed/persistent state.");
-		} else {
-			System.out.println("User1 is in the transient/detached state.");
-		}
-		userRepository.save(user1);
-		if (entityManager.contains(user1)) {
-			System.out.println("User1 is in the managed/persistent state after save.");
-		} else {
-			System.out.println("User1 is in the transient/detached state after save.");
-		}
-
-
+	public static void execureUserServices(ConfigurableApplicationContext context) {
+		var userServices = context.getBean(UserServices.class);
+		userServices.showEntityStates();
+		userServices.showRelatedEntities();
+		userServices.fetchAddress();
 	}
 
 	public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
