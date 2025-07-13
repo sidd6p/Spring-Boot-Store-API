@@ -45,6 +45,7 @@ public class StoreApplication {
 		productServices.find("aptop");
 		productServices.findByIDBetweenOrderbyName(1, 10);
 		productServices.findProductsByPriceRange(new BigDecimal("1000.0"), new BigDecimal("5000.0"));
+		productServices.findByExample();
 	}
 
 
