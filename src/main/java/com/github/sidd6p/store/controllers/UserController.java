@@ -1,6 +1,7 @@
 package com.github.sidd6p.store.controllers;
 
 import com.github.sidd6p.store.dtos.UserDto;
+import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/users")
 public class UserController {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @GetMapping()
     public List<UserDto> getAllUsers() {
@@ -40,7 +41,7 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // manually creating ResponseEntity
         } else {
-            return  ResponseEntity.ok(new UserDto(user.getId(), user.getName(), user.getEmail())); // builder pattern for ResponseEntity
+            return  ResponseEntity.ok(userMapper.toDto(user)); // builder pattern for ResponseEntity
         }
     }
 

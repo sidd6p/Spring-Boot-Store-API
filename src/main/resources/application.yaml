@@ -5,7 +5,7 @@ spring:
   application:
     name: store
   datasource:
-    url: jdbc:mysql://localhost:3307/store_api?createDatabaseIfNotExist=true&useSSL=false
+    url: jdbc:mysql://localhost:3307/store_api?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
   jpa:
