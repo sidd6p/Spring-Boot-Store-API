@@ -2,6 +2,7 @@ package com.github.sidd6p.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,11 +35,12 @@ public class User {
     @Column(name = "password", nullable = true)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
     // CascadeType.PERSIST: When saving a User, also save its Addresses.
     // CascadeType.REMOVE: When deleting a User, also delete its Addresses.
     // orphanRemoval = true: When removing an Address from the addresses list, delete it from the database even if the User is not deleted.
     @Builder.Default // Lombok: initializes the addresses list to an empty ArrayList by default
+    @JsonManagedReference
     private List<Address> addresses = new ArrayList<>();
 
     public void addAddress(Address address) {
@@ -59,6 +61,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "tag_id") // Foreign key column for Tag
     )
     @Builder.Default
+    @JsonManagedReference
     private Set<Tag> tags = new HashSet<>();
 
    public void addTag(Tag tag) {
@@ -71,6 +74,7 @@ public class User {
     }
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @JsonManagedReference
     private Profile profile;
 
 
@@ -85,5 +89,39 @@ public class User {
                 '}';
     }
 
-
 }
+
+/*
+ * JSON Serialization and Circular Reference Handling:
+ *
+ * This User entity has bidirectional relationships with Address, Tag, and Profile entities.
+ * When Spring Boot REST controllers serialize these entities to JSON (via Jackson),
+ * circular references can cause infinite loops and stack overflow errors.
+ *
+ * For example: User → Tag → User → Tag → User... (infinite nesting)
+ *
+ * Solution: Jackson annotations to break circular references:
+ *
+ * @JsonManagedReference - Applied to the "owning" side of relationships in User entity
+ *   - On addresses: User will include Address data in JSON, but Address won't include User back
+ *   - On tags: User will include Tag data in JSON, but Tag won't include User back
+ *   - On profile: User will include Profile data in JSON, but Profile won't include User back
+ *
+ * @JsonBackReference - Applied to the "inverse" side in related entities (Address, Tag, Profile)
+ *   - These fields are ignored during JSON serialization to prevent infinite loops
+ *   - The JPA relationships remain fully functional for database operations
+ *
+ * Result: Clean JSON output with complete relationship data but no circular references
+ * Example JSON structure:
+ * {
+ *   "id": 1,
+ *   "name": "John Doe",
+ *   "email": "john@example.com",
+ *   "addresses": [{"id": 1, "city": "NYC", "street": "Main St"}],
+ *   "tags": [{"id": 1, "name": "VIP"}],
+ *   "profile": {"id": 1, "bio": "Software Developer", "loyaltyPoints": 100}
+ * }
+ *
+ * Note: This only affects JSON serialization. All JPA operations (queries, cascading,
+ * relationship management) work normally in both directions.
+ */

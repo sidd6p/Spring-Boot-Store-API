@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.controllers;
 
+import com.github.sidd6p.store.entities.Message;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

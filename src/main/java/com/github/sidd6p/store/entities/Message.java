@@ -1,4 +1,4 @@
-package com.github.sidd6p.store.controllers;
+package com.github.sidd6p.store.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -2,6 +2,7 @@ package com.github.sidd6p.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Builder
 @AllArgsConstructor
@@ -27,10 +28,11 @@ public class Profile {
     @Column(name = "date_of_birth")
     private java.sql.Date dateOfBirth;
 
-    @OneToOne()
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     @MapsId
     @ToString.Exclude
+    @JsonBackReference
     private User user;
 
     // columnDefinition specifies the exact SQL fragment used when generating the DDL for this column.

@@ -3,6 +3,7 @@ package com.github.sidd6p.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Builder
 @AllArgsConstructor
@@ -35,6 +36,7 @@ public class Address {
     @ManyToOne()
     @ToString.Exclude
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
 }

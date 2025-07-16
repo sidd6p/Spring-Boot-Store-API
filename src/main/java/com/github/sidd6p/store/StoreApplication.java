@@ -27,7 +27,7 @@ public class StoreApplication {
 //		executeStoreOperations(context);
 //		executeRepositoryOperations(context);
 //		executeUserServices(context);
-		executeProductServices(context);
+//		executeProductServices(context);
 	}
 
 
