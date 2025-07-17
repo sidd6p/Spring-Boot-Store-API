@@ -43,7 +43,7 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // manually creating ResponseEntity
         } else {
-            return  ResponseEntity.ok(userMapper.toDto(user)); // builder pattern for ResponseEntity
+            return ResponseEntity.ok(userMapper.toDto(user)); // builder pattern for ResponseEntity
         }
     }
 

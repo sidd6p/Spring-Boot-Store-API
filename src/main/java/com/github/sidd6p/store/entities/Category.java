@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category")
+    @JsonManagedReference
     private Set<Product> products = new HashSet<>();
 
     public Category(String name) {
