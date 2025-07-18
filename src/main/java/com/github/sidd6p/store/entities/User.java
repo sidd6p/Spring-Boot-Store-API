@@ -35,10 +35,11 @@ public class User {
     @Column(name = "password", nullable = true)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.LAZY)
     // CascadeType.PERSIST: When saving a User, also save its Addresses.
     // CascadeType.REMOVE: When deleting a User, also delete its Addresses.
     // orphanRemoval = true: When removing an Address from the addresses list, delete it from the database even if the User is not deleted.
+    // fetch = FetchType.LAZY: Only load addresses when explicitly accessed, preventing N+1 queries
     @Builder.Default // Lombok: initializes the addresses list to an empty ArrayList by default
     @JsonManagedReference
     private List<Address> addresses = new ArrayList<>();
@@ -54,7 +55,7 @@ public class User {
     }
 
 
-    @ManyToMany()
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_tags", // Join table name
             joinColumns = @JoinColumn(name = "user_id"), // Foreign key column for User

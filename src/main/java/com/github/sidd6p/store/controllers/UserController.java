@@ -24,8 +24,7 @@ public class UserController {
 
 
     @GetMapping()
-    public List<UserDto> getAllUsers(@RequestHeader("x-auth-token") String authToken,
-                                     @RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
+    public List<UserDto> getAllUsers(@RequestHeader("x-auth-token") String authToken, @RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
         // We use stream() to process the List<User> from userRepository in a functional way.
         // stream() converts the List into a Stream, which allows us to use map(), filter(), etc.
         // map() transforms each User object into a UserDto object.
@@ -36,10 +35,7 @@ public class UserController {
             sortBy = "id";
         }
         log.info("Getting all users sorted by: {}", sortBy);
-        return userRepository.findAll(Sort.by(sortBy).ascending())
-                .stream()
-                .map(user -> new UserDto(user.getId(), user.getName(), user.getEmail()))
-                .toList(); // converts Stream<UserDto> to List<UserDto>
+        return userRepository.findAll(Sort.by(sortBy).ascending()).stream().map(user -> new UserDto(user.getId(), user.getName(), user.getEmail())).toList(); // converts Stream<UserDto> to List<UserDto>
     }
 
     @GetMapping("/{id}")
