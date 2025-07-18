@@ -22,10 +22,12 @@
 package com.github.sidd6p.store.mappers;
 
 import com.github.sidd6p.store.dtos.RegisterUserRequest;
+import com.github.sidd6p.store.dtos.UpdateUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -33,4 +35,7 @@ public interface UserMapper {
 
     @Mapping(source = "user_name", target = "name")
     User toEntity(RegisterUserRequest registerUserRequest);
+
+    @Mapping(source = "user_name", target = "name")
+    void update(UpdateUserRequest updateUserRequest, @MappingTarget User user);
 }

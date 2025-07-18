@@ -1,6 +1,7 @@
 package com.github.sidd6p.store.controllers;
 
 import com.github.sidd6p.store.dtos.RegisterUserRequest;
+import com.github.sidd6p.store.dtos.UpdateUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
@@ -70,6 +71,21 @@ public class UserController {
 
         // Return a ResponseEntity with the created status, the URI in the Location header, and the UserDto in the body
         return ResponseEntity.created(uri).body(UserDto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDto> updateUser(@RequestHeader("x-auth-token") String authToken,
+                                              @PathVariable long id,
+                                              @RequestBody UpdateUserRequest userUpdateRequest) {
+        log.info("Updating user with id {} with details: {}", id, userUpdateRequest);
+        var user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            userMapper.update(userUpdateRequest, user);
+            userRepository.save(user);
+            return ResponseEntity.ok(userMapper.toDto(user));
+        }
     }
 
 }
