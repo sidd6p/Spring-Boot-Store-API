@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public class UserDto {
 
-    @JsonIgnore
+//    @JsonIgnore
     private long id;
 
     @JsonProperty("user_name")

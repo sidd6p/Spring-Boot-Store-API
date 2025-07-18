@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.controllers;
 
+import com.github.sidd6p.store.dtos.RegisterUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +26,7 @@ public class UserController {
 
 
     @GetMapping()
-    public List<UserDto> getAllUsers(@RequestHeader("x-auth-token") String authToken, @RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
+    public List<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
         // We use stream() to process the List<User> from userRepository in a functional way.
         // stream() converts the List into a Stream, which allows us to use map(), filter(), etc.
         // map() transforms each User object into a UserDto object.
@@ -48,6 +50,26 @@ public class UserController {
             log.info("User with id {} found", id);
             return ResponseEntity.ok(userMapper.toDto(user)); // builder pattern for ResponseEntity
         }
+    }
+
+    @PostMapping()
+    public ResponseEntity<UserDto> createUser(@RequestHeader("x-auth-token") String authToken,
+                                              @RequestBody RegisterUserRequest registerUserRequest,
+                                              UriComponentsBuilder uriBuilder) {
+        log.info("Creating user with details: {}", registerUserRequest);
+        var user = userMapper.toEntity(registerUserRequest);
+        userRepository.save(user);
+
+        // Use UriComponentsBuilder to construct the URI for the newly created user
+        // 1. Specify the path template with a placeholder for the user ID.
+        // 2. Replace the placeholder with the actual user ID using buildAndExpand().
+        // 3. Convert the constructed URI to a java.net.URI object.
+        var uri = uriBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
+
+        var UserDto = userMapper.toDto(user);
+
+        // Return a ResponseEntity with the created status, the URI in the Location header, and the UserDto in the body
+        return ResponseEntity.created(uri).body(UserDto);
     }
 
 }

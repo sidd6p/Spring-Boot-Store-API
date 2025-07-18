@@ -21,11 +21,16 @@
 
 package com.github.sidd6p.store.mappers;
 
+import com.github.sidd6p.store.dtos.RegisterUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.entities.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserDto toDto(User user);
+
+    @Mapping(source = "user_name", target = "name")
+    User toEntity(RegisterUserRequest registerUserRequest);
 }
