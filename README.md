@@ -89,7 +89,9 @@ This project emphasizes:
 │   ├── docker-compose.yaml          # Multi-container orchestration
 │   └── docker/mysql/                # MySQL initialization scripts
 │       └── docker-entrypoint-initdb.d/
-│           └── create_tables.sql
+│           ├── 01_create_tables.sql # Database table definitions
+│           ├── 02_insert_data.sql   # Sample data insertion
+│           └── 03_create_procedures.sql # Stored procedures
 ├── learning/                        # Course materials
 │   └── Database Integration with Spring Data JPA.pdf
 └── Configuration Files
