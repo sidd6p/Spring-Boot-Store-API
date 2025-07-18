@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Set;
@@ -16,12 +17,15 @@ import java.util.Set;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+
     @GetMapping()
-    public List<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
+    public List<UserDto> getAllUsers(@RequestHeader("x-auth-token") String authToken,
+                                     @RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
         // We use stream() to process the List<User> from userRepository in a functional way.
         // stream() converts the List into a Stream, which allows us to use map(), filter(), etc.
         // map() transforms each User object into a UserDto object.
@@ -31,6 +35,7 @@ public class UserController {
         if (!Set.of("id", "name", "email").contains(sortBy)) {
             sortBy = "id";
         }
+        log.info("Getting all users sorted by: {}", sortBy);
         return userRepository.findAll(Sort.by(sortBy).ascending())
                 .stream()
                 .map(user -> new UserDto(user.getId(), user.getName(), user.getEmail()))
@@ -41,8 +46,10 @@ public class UserController {
     public ResponseEntity<UserDto> getUserById(@PathVariable("id") long id) {
         var user = userRepository.findById(id).orElse(null);
         if (user == null) {
+            log.error("User with id {} not found", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // manually creating ResponseEntity
         } else {
+            log.info("User with id {} found", id);
             return ResponseEntity.ok(userMapper.toDto(user)); // builder pattern for ResponseEntity
         }
     }
