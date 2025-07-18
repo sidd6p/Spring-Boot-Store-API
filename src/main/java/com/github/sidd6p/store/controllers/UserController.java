@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.controllers;
 
+import com.github.sidd6p.store.dtos.ChangePasswordRequest;
 import com.github.sidd6p.store.dtos.RegisterUserRequest;
 import com.github.sidd6p.store.dtos.UpdateUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
@@ -82,7 +83,7 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            userMapper.update(userUpdateRequest, user);
+            userMapper.updateUser(userUpdateRequest, user);
             userRepository.save(user);
             return ResponseEntity.ok(userMapper.toDto(user));
         }
@@ -99,4 +100,24 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
+
+   @PostMapping("/{id}/change-password")
+    public ResponseEntity<Void> updatePassword(@PathVariable("id") long id,
+                                               @RequestBody ChangePasswordRequest changePasswordRequest) {
+        log.info("Updating password for user with id {}", id);
+        var user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            log.info("User with id {} not found", id);
+            return ResponseEntity.notFound().build();
+        } else {
+            if (user.getPassword().equals(changePasswordRequest.getOldPassword())) {
+                user.setPassword(changePasswordRequest.getNewPassword());
+                userRepository.save(user);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        }
+    }
+
 }

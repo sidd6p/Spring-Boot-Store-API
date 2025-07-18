@@ -37,5 +37,5 @@ public interface UserMapper {
     User toEntity(RegisterUserRequest registerUserRequest);
 
     @Mapping(source = "user_name", target = "name")
-    void update(UpdateUserRequest updateUserRequest, @MappingTarget User user);
+    void updateUser(UpdateUserRequest updateUserRequest, @MappingTarget User user);
 }
