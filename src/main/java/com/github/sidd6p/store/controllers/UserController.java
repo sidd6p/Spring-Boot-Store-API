@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class UserController {
 
    @PostMapping("/{id}/change-password")
     public ResponseEntity<Void> updatePassword(@PathVariable("id") long id,
-                                               @RequestBody ChangePasswordRequest changePasswordRequest) {
+                                               @Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
         log.info("Updating password for user with id {}", id);
         var user = userRepository.findById(id).orElse(null);
         if (user == null) {
