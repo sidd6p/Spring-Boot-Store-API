@@ -10,13 +10,17 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.springframework.validation.FieldError;
 
 
 @RestController
@@ -56,8 +60,10 @@ public class UserController {
     }
 
     @PostMapping()
+    // This will throw a MethodArgumentNotValidException if the validation fails, which can be handled globally by an exception handler.
+    // If validation fails, then createUser will not be called, and the error response will be generated automatically.
     public ResponseEntity<UserDto> createUser(@RequestHeader("x-auth-token") String authToken,
-                                              @RequestBody RegisterUserRequest registerUserRequest,
+                                              @Valid @RequestBody RegisterUserRequest registerUserRequest,
                                               UriComponentsBuilder uriBuilder) {
         log.info("Creating user with details: {}", registerUserRequest);
         var user = userMapper.toEntity(registerUserRequest);
@@ -119,6 +125,19 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
+
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+        var errors = new HashMap<String, String>();
+        exception.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+            log.error("Validation error in field '{}': {}", fieldName, errorMessage);
+        });
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
 }
