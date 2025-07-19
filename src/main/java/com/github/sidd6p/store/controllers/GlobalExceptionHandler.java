@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -45,6 +46,40 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
             log.error("Validation error in field '{}': {}", fieldName, errorMessage);
+        });
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    /**
+     * Handles constraint violation exceptions that occur during entity validation.
+     *
+     * These exceptions typically occur when Bean Validation constraints on entities
+     * are violated during persistence operations, such as when saving an entity to
+     * the database with invalid field values.
+     *
+     * Example response:
+     * {
+     *   "email": "Value must be in lower case"
+     * }
+     *
+     * Note: Even though handleGenericException catches Exception (parent of ConstraintViolationException),
+     * Spring's exception resolution mechanism prioritizes built-in handlers for validation exceptions
+     * before reaching our generic handler. ConstraintViolationException is handled by Spring's
+     * default exception resolvers first, which is why we need this specific handler.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException exception) {
+        var errors = new HashMap<String, String>();
+
+        exception.getConstraintViolations().forEach(violation -> {
+            String propertyPath = violation.getPropertyPath().toString();
+            // Extract just the field name from the property path (removes the method name if present)
+            String fieldName = propertyPath.contains(".") ?
+                propertyPath.substring(propertyPath.lastIndexOf('.') + 1) : propertyPath;
+            String errorMessage = violation.getMessage();
+            errors.put(fieldName, errorMessage);
+            log.error("Constraint violation in field '{}': {}", fieldName, errorMessage);
         });
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);

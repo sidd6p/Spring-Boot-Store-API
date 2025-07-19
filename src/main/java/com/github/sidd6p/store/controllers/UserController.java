@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -58,10 +59,15 @@ public class UserController {
     @PostMapping()
     // This will throw a MethodArgumentNotValidException if the validation fails, which can be handled globally by an exception handler.
     // If validation fails, then createUser will not be called, and the error response will be generated automatically.
-    public ResponseEntity<UserDto> createUser(@RequestHeader("x-auth-token") String authToken,
+    public ResponseEntity<Object> createUser(@RequestHeader("x-auth-token") String authToken,
                                               @Valid @RequestBody RegisterUserRequest registerUserRequest,
                                               UriComponentsBuilder uriBuilder) {
         log.info("Creating user with details: {}", registerUserRequest);
+
+        if (userRepository.existsByEmail(registerUserRequest.getEmail())) {
+            log.error("User with email {} already exists", registerUserRequest.getEmail());
+            return ResponseEntity.badRequest().body(Map.of("error", "User with this email already exists"));
+        }
         var user = userMapper.toEntity(registerUserRequest);
         userRepository.save(user);
 
