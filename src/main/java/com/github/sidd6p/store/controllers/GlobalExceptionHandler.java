@@ -1,6 +1,5 @@
 package com.github.sidd6p.store.controllers;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -10,17 +9,33 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// The @ControllerAdvice annotation allows this class to provide centralized exception handling across all controllers.
-// It acts as a global interceptor for controller exceptions.
+/**
+ * Global exception handler for the entire application.
+ *
+ * This class automatically catches exceptions thrown by any controller and handles them
+ * using the methods annotated with @ExceptionHandler. It helps avoid repeating try-catch
+ * blocks in each controller and ensures consistent error responses.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-
-    // The @ExceptionHandler annotation defines a method that handles specific types of exceptions.
-    // When a MethodArgumentNotValidException is thrown by any controller, this method will be invoked.
+    /**
+     * Handles validation errors triggered by @Valid annotated request bodies.
+     *
+     * When validation fails (e.g., missing required field or invalid format),
+     * Spring throws a MethodArgumentNotValidException. This method catches that exception,
+     * extracts all field-specific validation errors, and returns them in a structured map.
+     *
+     * Example response:
+     * {
+     *   "email": "must be a valid email",
+     *   "name": "must not be blank"
+     * }
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
         var errors = new HashMap<String, String>();
@@ -35,7 +50,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    // This handler catches any generic Exception that isn't caught by a more specific handler.
+    /**
+     * Handles any unhandled exceptions that are not specifically caught elsewhere.
+     *
+     * This acts as a fallback to ensure that even unexpected exceptions return
+     * a proper HTTP 500 response instead of crashing the application.
+     *
+     * Note:
+     * If a more specific handler (like the one above for MethodArgumentNotValidException) exists,
+     * that handler will take precedence and this method will not be called.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception exception) {
         var errors = new HashMap<String, String>();

@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.entities;
 
+import com.github.sidd6p.store.validations.LowerCase;
 import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -30,6 +31,7 @@ public class User {
     private String name;
 
     @Column(name = "email", unique = true)
+    @LowerCase
     private String email;
 
     @Column(name = "password", nullable = true)
