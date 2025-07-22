@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 // The @Data annotation generates getters, setters, toString, equals, and hashCode methods automatically.
+// This create ToString method that includes all fields, which is useful for logging and debugging. And sometimes it can cause issue with LAZY loaded fields.
 @Data
 public class RegisterUserRequest {
     private String user_name;
