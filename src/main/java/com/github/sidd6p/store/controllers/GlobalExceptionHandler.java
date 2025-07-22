@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
 
         String errorMessage = exception.getMessage() != null ? exception.getMessage() : "An unexpected error occurred";
         errors.put("error", errorMessage);
-        log.error("Unexpected error occurred: {}", errorMessage, exception);
+        log.error("Unexpected error occurred: {}", errorMessage);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
