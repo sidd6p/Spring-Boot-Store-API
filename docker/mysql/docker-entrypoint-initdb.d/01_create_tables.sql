@@ -70,3 +70,27 @@ CREATE TABLE
                    KEY `products_relation_1` (`category_id`),
                    CONSTRAINT `products_relation_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+
+
+CREATE TABLE
+  `carts` (
+    `id` binary(16) NOT NULL DEFAULT(uuid_to_bin(uuid())),
+    `date_created` date NOT NULL DEFAULT(curdate()),
+    PRIMARY KEY (`id`)
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE
+  `cart_items` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT,
+    `cart_id` binary(16) NOT NULL,
+    `product_id` int unsigned NOT NULL,
+    `quantity` int NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_cart_product` (`cart_id`, `product_id`),
+    KEY `cart_items_relation_1` (`cart_id`),
+    KEY `cart_items_relation_2` (`product_id`),
+    CONSTRAINT `cart_items_relation_1` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`),
+    CONSTRAINT `cart_items_relation_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
