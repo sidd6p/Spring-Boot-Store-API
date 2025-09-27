@@ -1,4 +1,4 @@
-package com.github.sidd6p.store.dto;
+package com.github.sidd6p.store.dtos;
 
 import lombok.Data;
 

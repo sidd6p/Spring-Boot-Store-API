@@ -1,12 +1,11 @@
 package com.github.sidd6p.store.controllers;
 
-
-import com.github.sidd6p.store.dto.AddItemToCartRequest;
+import com.github.sidd6p.store.dtos.AddItemToCartRequest;
+import com.github.sidd6p.store.dtos.AddItemToCartResponse;
 import com.github.sidd6p.store.dtos.CartDto;
-import com.github.sidd6p.store.dtos.CartItemDto;
 import com.github.sidd6p.store.entities.Cart;
 import com.github.sidd6p.store.entities.CartItem;
-import com.github.sidd6p.store.mappers.CartItemMapper;
+import com.github.sidd6p.store.mappers.AddItemToCartResponseMapper;
 import com.github.sidd6p.store.mappers.CartMapper;
 import com.github.sidd6p.store.repositories.CartRepository;
 import com.github.sidd6p.store.repositories.ProductRepository;
@@ -28,7 +27,7 @@ public class CartController {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final CartMapper cartMapper;
-    private final CartItemMapper cartItemMapper;
+    private final AddItemToCartResponseMapper addItemToCartResponseMapper;
     private final EntityManager entityManager;
 
     @PostMapping()
@@ -65,7 +64,7 @@ public class CartController {
 
     @PostMapping("/{cartID}/items")
     @Transactional
-    public ResponseEntity<CartItemDto> addToCart(@PathVariable UUID cartID, @RequestBody AddItemToCartRequest addItemToCartRequest) {
+    public ResponseEntity<AddItemToCartResponse> addToCart(@PathVariable UUID cartID, @RequestBody AddItemToCartRequest addItemToCartRequest) {
         log.info("Adding item to cart with ID: {}", cartID);
 
         var cart = cartRepository.findById(cartID).orElse(null);
@@ -94,8 +93,8 @@ public class CartController {
         }
 
         cartRepository.save(cart);
-        entityManager.flush(); // Force database to generate the ID
-        entityManager.refresh(cart); // Refresh the entire cart to get all generated IDs
+        entityManager.flush();
+        entityManager.refresh(cart);
 
         // Find the persisted cartItem to get its generated ID
         var persistedCartItem = cart.getCartItems().stream()
@@ -103,7 +102,8 @@ public class CartController {
                 .findFirst()
                 .orElse(cartItem);
 
-        return ResponseEntity.ok(cartItemMapper.toDto(persistedCartItem));
+        // Use mapper to create the response - much simpler!
+        return ResponseEntity.ok(addItemToCartResponseMapper.toResponse(persistedCartItem));
     }
 
 }
