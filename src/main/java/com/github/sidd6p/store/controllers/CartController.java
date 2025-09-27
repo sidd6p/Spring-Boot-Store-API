@@ -64,6 +64,7 @@ public class CartController {
     }
 
     @PostMapping("/{cartID}/items")
+    @Transactional
     public ResponseEntity<CartItemDto> addToCart(@PathVariable UUID cartID, @RequestBody AddItemToCartRequest addItemToCartRequest) {
         log.info("Adding item to cart with ID: {}", cartID);
 
@@ -91,9 +92,18 @@ public class CartController {
            cartItem.setCart(cart);
            cart.getCartItems().add(cartItem);
         }
-        cartRepository.save(cart);
 
-        return ResponseEntity.ok(cartItemMapper.toDto(cartItem));
+        cartRepository.save(cart);
+        entityManager.flush(); // Force database to generate the ID
+        entityManager.refresh(cart); // Refresh the entire cart to get all generated IDs
+
+        // Find the persisted cartItem to get its generated ID
+        var persistedCartItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .findFirst()
+                .orElse(cartItem);
+
+        return ResponseEntity.ok(cartItemMapper.toDto(persistedCartItem));
     }
 
 }

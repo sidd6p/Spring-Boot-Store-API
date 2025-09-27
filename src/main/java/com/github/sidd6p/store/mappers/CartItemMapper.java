@@ -5,8 +5,7 @@ import com.github.sidd6p.store.entities.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ProductMapper.class})
+@Mapper(componentModel = "spring", uses = {ProductMapper.class, CartReferenceMapper.class})
 public interface CartItemMapper {
-    @Mapping(target = "cart", ignore = true) // Ignore cart to avoid circular reference
     CartItemDto toDto(CartItem cartItem);
 }
