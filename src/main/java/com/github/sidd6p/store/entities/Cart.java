@@ -10,10 +10,11 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Entity
+@Entity // This tells EntityManager "this is a database entity"
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Table(name = "carts")
 public class Cart {
     @Id
@@ -22,7 +23,7 @@ public class Cart {
 
     // Database automatically sets the date_created with DEFAULT(curdate())
     // so we prevent JPA from trying to insert/update this field
-    @Column(insertable = false, updatable = false)
+    @Column(name = "date_created", insertable = false, updatable = false)
     private LocalDate dateCreated;
 
     @OneToMany(mappedBy = "cart")

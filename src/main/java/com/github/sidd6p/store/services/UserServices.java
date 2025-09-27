@@ -80,6 +80,12 @@ public class UserServices {
         userRepository.save(user);
     }
 
+    /**
+     * The @Transactional annotation is added to the deleteRelated() method to ensure that the method runs within an active
+     * Hibernate session, fixing the LazyInitializationException. This guarantees that the User and Address entities
+     * are properly loaded and managed within the transaction, allowing for their correct deletion.
+     */
+    @Transactional
     public void deleteRelated() {
         userRepository.findById(1L).ifPresent(user -> {;
             addressRepository.deleteAll(user.getAddresses());

@@ -24,10 +24,10 @@ public class StoreApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
-//		executeStoreOperations(context);
-//		executeRepositoryOperations(context);
-//		executeUserServices(context);
-//		executeProductServices(context);
+		executeStoreOperations(context);
+		executeRepositoryOperations(context);
+		executeUserServices(context);
+		executeProductServices(context);
 	}
 
 
