@@ -30,6 +30,18 @@ public class CartController {
     private final AddItemToCartResponseMapper addItemToCartResponseMapper;
     private final EntityManager entityManager;
 
+
+    @GetMapping("/{cartID}")
+    public ResponseEntity<CartDto> getCartById(@PathVariable UUID cartID) {
+        log.info("Fetching cart with ID: {}", cartID);
+        var cart = cartRepository.findById(cartID).orElse(null);
+        if (cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(cartMapper.toDto(cart));
+    }
+
+
     @PostMapping()
     /**
      * @Transactional is REQUIRED here because we're using EntityManager directly instead of repository.save()

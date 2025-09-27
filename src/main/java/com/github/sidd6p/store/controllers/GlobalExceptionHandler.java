@@ -6,6 +6,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,6 @@ import java.util.Map;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 /**
  * Global exception handler for the entire application.
  *
@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * using the methods annotated with @ExceptionHandler. It helps avoid repeating try-catch
  * blocks in each controller and ensures consistent error responses.
  */
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -81,6 +82,39 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
             log.error("Constraint violation in field '{}': {}", fieldName, errorMessage);
         });
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    /**
+     * Handles method argument type mismatch exceptions, commonly occurring when
+     * path variables cannot be converted to their expected types.
+     *
+     * This is particularly useful for UUID path parameters where invalid formats
+     * (like strings that are too long or contain invalid characters) cause conversion failures.
+     *
+     * Example scenarios:
+     * - GET /carts/invalid-uuid-format -> 400 Bad Request instead of 500 Internal Server Error
+     * - GET /carts/123-456-789-too-long -> 400 Bad Request with clear message
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
+        var errors = new HashMap<String, String>();
+
+        String parameterName = exception.getName();
+        Class<?> requiredType = exception.getRequiredType();
+        Object rejectedValue = exception.getValue();
+
+        String errorMessage;
+        if (requiredType != null && requiredType.equals(java.util.UUID.class)) {
+            errorMessage = String.format("Invalid UUID format for parameter '%s': '%s'", parameterName, rejectedValue);
+        } else {
+            errorMessage = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s",
+                rejectedValue, parameterName, requiredType != null ? requiredType.getSimpleName() : "unknown");
+        }
+
+        errors.put(parameterName, errorMessage);
+        log.warn("Method argument type mismatch: {}", errorMessage);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }

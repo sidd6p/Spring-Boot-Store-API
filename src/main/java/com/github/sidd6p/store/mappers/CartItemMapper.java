@@ -7,6 +7,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {ProductMapper.class})
 public interface CartItemMapper {
-    @Mapping(source = "cart.id", target = "cartId")
+    @Mapping(target = "totalPrice", expression = "java(cartItem.getProduct().getPrice().multiply(java.math.BigDecimal.valueOf(cartItem.getQuantity())))")
     CartItemDto toDto(CartItem cartItem);
 }
