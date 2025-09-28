@@ -40,5 +40,24 @@ public class Product {
                 '}';
     }
 
+    // Business logic methods - Information Expert principle
+
+    /**
+     * Updates product information from a request
+     * @param name new name (can be null to keep current)
+     * @param price new price (can be null to keep current)
+     * @param category new category (can be null to keep current)
+     */
+    public void updateFromRequest(String name, java.math.BigDecimal price, Category category) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (price != null) {
+            this.price = price;
+        }
+        if (category != null) {
+            this.category = category;
+        }
+    }
 
 }

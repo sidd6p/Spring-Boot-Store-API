@@ -5,7 +5,6 @@ import com.github.sidd6p.store.dtos.AddItemToCartResponse;
 import com.github.sidd6p.store.dtos.CartDto;
 import com.github.sidd6p.store.dtos.UpdateCartItemRequest;
 import com.github.sidd6p.store.entities.Cart;
-import com.github.sidd6p.store.entities.CartItem;
 import com.github.sidd6p.store.mappers.AddItemToCartResponseMapper;
 import com.github.sidd6p.store.mappers.CartMapper;
 import com.github.sidd6p.store.repositories.CartRepository;
@@ -91,36 +90,23 @@ public class CartController {
             return ResponseEntity.badRequest().build();
         }
 
-        var existingCartItem = cart.getCartItems().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .findFirst()
-                .orElse(null);
+        // Use Cart's addProduct method which handles duplicate checking internally
+        try {
+            var cartItem = cart.addProduct(product);
 
-        // If item already exists, return conflict status - don't update quantity
-        if (existingCartItem != null) {
-            log.warn("Item with product ID {} already exists in cart {}", product.getId(), cartID);
-            return ResponseEntity.status(409).build(); // 409 Conflict
+            cartRepository.save(cart);
+            entityManager.flush();
+            entityManager.refresh(cart);
+
+            // Find the persisted cartItem to get its generated ID
+            var persistedCartItem = cart.findCartItemByProductId(product.getId())
+                    .orElse(cartItem);
+
+            return ResponseEntity.ok(addItemToCartResponseMapper.toResponse(persistedCartItem));
+        } catch (IllegalStateException e) {
+            log.warn("Failed to add product to cart: {}", e.getMessage());
+            return ResponseEntity.status(409).build();
         }
-
-        // Only add new items
-        var cartItem = new CartItem();
-        cartItem.setQuantity(1);
-        cartItem.setProduct(product);
-        cartItem.setCart(cart);
-        cart.getCartItems().add(cartItem);
-
-        cartRepository.save(cart);
-        entityManager.flush();
-        entityManager.refresh(cart);
-
-        // Find the persisted cartItem to get its generated ID
-        var persistedCartItem = cart.getCartItems().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .findFirst()
-                .orElse(cartItem);
-
-        // Use mapper to create the response - much simpler!
-        return ResponseEntity.ok(addItemToCartResponseMapper.toResponse(persistedCartItem));
     }
 
     @PutMapping("/{cartID}/items/{productId}")
@@ -133,17 +119,10 @@ public class CartController {
             return ResponseEntity.notFound().build();
         }
 
-        var cartItem = cart.getCartItems().stream()
-                .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElse(null);
-
-        if (cartItem == null) {
+        // Use Cart's business logic method instead of controller logic
+        if (!cart.updateProductQuantity(productId, request.getQuantity())) {
             return ResponseEntity.notFound().build();
         }
-
-        // Update the quantity
-        cartItem.setQuantity(request.getQuantity());
 
         cartRepository.save(cart);
         entityManager.flush();

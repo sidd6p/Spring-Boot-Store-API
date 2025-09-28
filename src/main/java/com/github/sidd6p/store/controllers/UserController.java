@@ -88,7 +88,8 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            userMapper.updateUser(userUpdateRequest, user);
+            // Use User's business logic method instead of mapper
+            user.updateFromRequest(userUpdateRequest.getUser_name(), userUpdateRequest.getEmail());
             userRepository.save(user);
             return ResponseEntity.ok(userMapper.toDto(user));
         }
@@ -115,15 +116,15 @@ public class UserController {
             log.info("User with id {} not found", id);
             return ResponseEntity.notFound().build();
         } else {
-            if (user.getPassword().equals(changePasswordRequest.getOldPassword())) {
-                user.setPassword(changePasswordRequest.getNewPassword());
+            // Use User's business logic method instead of controller logic
+            if (user.changePassword(changePasswordRequest.getOldPassword(),
+                                  changePasswordRequest.getNewPassword())) {
                 userRepository.save(user);
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
-
     }
 
 }

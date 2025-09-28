@@ -82,3 +82,4 @@ store.zip
 # Docker compose override files
 docker-compose.override.yml
 docker-compose.override.yaml
+/learning/tocheck.md

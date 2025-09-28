@@ -3,6 +3,7 @@ package com.github.sidd6p.store.controllers;
 
 import com.github.sidd6p.store.dtos.ProductDto;
 import com.github.sidd6p.store.dtos.RegisterProductRequest;
+import com.github.sidd6p.store.entities.Category;
 import com.github.sidd6p.store.mappers.ProductMapper;
 import com.github.sidd6p.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
@@ -79,24 +80,23 @@ public class ProductController {
         if (product == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            // Update name and price directly
-            if (registerProductRequest.getName() != null) {
-                product.setName(registerProductRequest.getName());
-            }
-            if (registerProductRequest.getPrice() != null) {
-                product.setPrice(registerProductRequest.getPrice());
-            }
-
-            // Only update category if category_id is provided and valid
+            // Handle category update if category_id is provided
+            Category categoryToSet = null;
             if (registerProductRequest.getCategory_id() != null) {
                 var updatedProduct = productMapper.toEntity(registerProductRequest);
-                if (updatedProduct.getCategory() != null) {
-                    product.setCategory(updatedProduct.getCategory());
-                }  else {
+                if (updatedProduct.getCategory() == null) {
                     log.info("Invalid category_id provided for product update: {}", registerProductRequest.getCategory_id());
-                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                 }
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+                categoryToSet = updatedProduct.getCategory();
             }
+
+            // Use Product's business logic method instead of setting fields directly
+            product.updateFromRequest(
+                registerProductRequest.getName(),
+                registerProductRequest.getPrice(),
+                categoryToSet
+            );
 
             productRepository.save(product);
             return ResponseEntity.ok(productMapper.toDto(product));

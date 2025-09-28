@@ -78,8 +78,33 @@ public class User {
     @JsonManagedReference
     private Profile profile;
 
+    // Business logic methods - Information Expert principle
 
+    /**
+     * Changes the user's password if the old password matches
+     * @param oldPassword the current password to verify
+     * @param newPassword the new password to set
+     * @return true if password was changed, false if old password doesn't match
+     */
+    public boolean changePassword(String oldPassword, String newPassword) {
+        if (this.password != null && this.password.equals(oldPassword)) {
+            this.password = newPassword;
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * Updates user information from a request
+     */
+    public void updateFromRequest(String name, String email) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (email != null) {
+            this.email = email;
+        }
+    }
 
     @Override
     public String toString() {
