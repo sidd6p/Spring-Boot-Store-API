@@ -4,7 +4,7 @@ import com.github.sidd6p.store.dtos.ChangePasswordRequest;
 import com.github.sidd6p.store.dtos.RegisterUserRequest;
 import com.github.sidd6p.store.dtos.UpdateUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
-import com.github.sidd6p.store.services.UserServices;
+import com.github.sidd6p.store.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -25,18 +25,18 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "User Management", description = "APIs for managing users")
 public class UserController {
-    private final UserServices userServices;
+    private final UserService userService;
 
     @GetMapping()
     @Operation(summary = "Get all users", description = "Retrieve a list of all users, optionally sorted by a specified field.")
     public List<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
-        return userServices.getAllUsers(sortBy);
+        return userService.getAllUsers(sortBy);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID", description = "Retrieve a specific user by their ID.")
     public ResponseEntity<UserDto> getUserById(@PathVariable("id") long id) {
-        return userServices.getUserById(id)
+        return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -47,7 +47,7 @@ public class UserController {
                                               @Valid @RequestBody RegisterUserRequest registerUserRequest,
                                               UriComponentsBuilder uriBuilder) {
         try {
-            var userDto = userServices.createUser(registerUserRequest);
+            var userDto = userService.createUser(registerUserRequest);
             var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
             return ResponseEntity.created(uri).body(userDto);
         } catch (IllegalArgumentException e) {
@@ -60,7 +60,7 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(@RequestHeader("x-auth-token") String authToken,
                                               @PathVariable long id,
                                               @RequestBody UpdateUserRequest userUpdateRequest) {
-        return userServices.updateUser(id, userUpdateRequest)
+        return userService.updateUser(id, userUpdateRequest)
                 .map(ResponseEntity::ok)
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -68,7 +68,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user", description = "Remove a user from the system.")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) {
-        if (userServices.deleteUser(id)) {
+        if (userService.deleteUser(id)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return ResponseEntity.notFound().build();
@@ -79,7 +79,7 @@ public class UserController {
     @Operation(summary = "Change user password", description = "Update a user's password.")
     public ResponseEntity<Void> updatePassword(@PathVariable("id") long id,
                                                @Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
-        if (userServices.changePassword(id, changePasswordRequest)) {
+        if (userService.changePassword(id, changePasswordRequest)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

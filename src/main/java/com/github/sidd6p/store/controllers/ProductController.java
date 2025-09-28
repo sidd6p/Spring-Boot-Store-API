@@ -3,7 +3,7 @@ package com.github.sidd6p.store.controllers;
 
 import com.github.sidd6p.store.dtos.ProductDto;
 import com.github.sidd6p.store.dtos.RegisterProductRequest;
-import com.github.sidd6p.store.services.ProductServices;
+import com.github.sidd6p.store.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -21,18 +21,18 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Product", description = "Product management APIs")
 public class ProductController {
-    private final ProductServices productServices;
+    private final ProductService productService;
 
     @GetMapping()
     @Operation(summary = "Get all products", description = "Retrieve a list of all products, optionally filtered by category.")
     public List<ProductDto> getAllProducts(@RequestParam(required = false, name = "category") String category) {
-        return productServices.getAllProducts(category);
+        return productService.getAllProducts(category);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get product by ID", description = "Retrieve a specific product by its ID.")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Integer id) {
-        return productServices.getProductById(id)
+        return productService.getProductById(id)
                 .map(ResponseEntity::ok)
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -41,7 +41,7 @@ public class ProductController {
     @Operation(summary = "Create new product", description = "Register a new product in the system.")
     public ResponseEntity<ProductDto> createProduct(@RequestBody RegisterProductRequest registerProductRequest,
                                                    UriComponentsBuilder uriBuilder) {
-        var productDto = productServices.createProduct(registerProductRequest);
+        var productDto = productService.createProduct(registerProductRequest);
         var uri = uriBuilder.path("/products/{id}")
                 .buildAndExpand(productDto.getId())
                 .toUri();
@@ -51,7 +51,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete product", description = "Remove a product from the system.")
     public ResponseEntity<Void> deleteProductById(@PathVariable("id") Integer id) {
-        if (productServices.deleteProductById(id)) {
+        if (productService.deleteProductById(id)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -63,7 +63,7 @@ public class ProductController {
     public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Integer id,
                                                    @RequestBody RegisterProductRequest registerProductRequest) {
         try {
-            return productServices.updateProduct(id, registerProductRequest)
+            return productService.updateProduct(id, registerProductRequest)
                     .map(ResponseEntity::ok)
                     .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
         } catch (IllegalArgumentException e) {

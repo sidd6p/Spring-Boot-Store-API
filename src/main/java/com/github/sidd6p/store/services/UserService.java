@@ -24,7 +24,7 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class UserServices implements UserDetailsService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final AddressRepository addressRepository;

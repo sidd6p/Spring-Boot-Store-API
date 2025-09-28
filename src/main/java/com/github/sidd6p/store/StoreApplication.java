@@ -7,8 +7,8 @@ import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import com.github.sidd6p.store.repositories.UserRepository;
-import com.github.sidd6p.store.services.ProductServices;
-import com.github.sidd6p.store.services.UserServices;
+import com.github.sidd6p.store.services.ProductService;
+import com.github.sidd6p.store.services.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -32,7 +32,7 @@ public class StoreApplication {
 
 
 	public static void executeUserServices(ConfigurableApplicationContext context) {
-		var userServices = context.getBean(UserServices.class);
+		var userServices = context.getBean(UserService.class);
 		userServices.showEntityStates();
 		userServices.showRelatedEntities();
 		userServices.fetchAddress();
@@ -41,7 +41,7 @@ public class StoreApplication {
 	}
 
 	public static void executeProductServices(ConfigurableApplicationContext context) {
-		var productServices = context.getBean(ProductServices.class);
+		var productServices = context.getBean(ProductService.class);
 		productServices.find("aptop");
 		productServices.findByIDBetweenOrderbyName(1, 10);
 		productServices.findProductsByPriceRange(new BigDecimal("1000.0"), new BigDecimal("5000.0"));

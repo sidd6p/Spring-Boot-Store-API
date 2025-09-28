@@ -21,7 +21,7 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class ProductServices {
+public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
