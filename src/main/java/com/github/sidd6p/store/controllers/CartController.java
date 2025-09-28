@@ -147,4 +147,19 @@ public class CartController {
         entityManager.refresh(cart);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{cartID}/items")
+    @Transactional
+    public ResponseEntity<Void> clearCart(@PathVariable UUID cartID) {
+        log.info("Clearing all items from cart {}", cartID);
+        var cart = cartRepository.findById(cartID).orElse(null);
+        if (cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+        cart.clearCart();
+        cartRepository.save(cart);
+        entityManager.flush();
+        entityManager.refresh(cart);
+        return ResponseEntity.noContent().build();
+    }
 }

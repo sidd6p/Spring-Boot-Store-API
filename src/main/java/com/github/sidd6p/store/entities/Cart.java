@@ -110,4 +110,8 @@ public class Cart {
                 .mapToInt(CartItem::getQuantity)
                 .sum();
     }
+
+    public void clearCart() {
+        cartItems.clear();
+    }
 }
