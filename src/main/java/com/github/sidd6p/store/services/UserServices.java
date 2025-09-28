@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class UserServices {
     private final AddressRepository addressRepository;
     private final UserMapper userMapper;
     private final EntityManager entityManager;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserDto> getAllUsers(String sortBy) {
         if (!Set.of("id", "name", "email").contains(sortBy)) {
@@ -54,6 +56,7 @@ public class UserServices {
         }
 
         var user = userMapper.toEntity(registerUserRequest);
+        user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
         userRepository.save(user);
 
         return userMapper.toDto(user);
