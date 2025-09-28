@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -117,6 +118,27 @@ public class GlobalExceptionHandler {
         log.warn("Method argument type mismatch: {}", errorMessage);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    /**
+     * Handles NoResourceFoundException when an endpoint/resource is not found.
+     *
+     * This occurs when:
+     * - A request is made to an endpoint that doesn't exist (e.g., PUT /carts/{id}/items/{id})
+     * - Spring treats it as a static resource request and fails to find it
+     *
+     * Returns 404 Not Found instead of 500 Internal Server Error.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException exception) {
+        var errors = new HashMap<String, String>();
+
+        String resourcePath = exception.getResourcePath();
+        String errorMessage = String.format("Endpoint not found: %s", resourcePath);
+        errors.put("error", errorMessage);
+        log.warn("Resource not found: {}", resourcePath);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
     }
 
     /**

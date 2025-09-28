@@ -3,6 +3,7 @@ package com.github.sidd6p.store.controllers;
 import com.github.sidd6p.store.dtos.AddItemToCartRequest;
 import com.github.sidd6p.store.dtos.AddItemToCartResponse;
 import com.github.sidd6p.store.dtos.CartDto;
+import com.github.sidd6p.store.dtos.UpdateCartItemRequest;
 import com.github.sidd6p.store.entities.Cart;
 import com.github.sidd6p.store.entities.CartItem;
 import com.github.sidd6p.store.mappers.AddItemToCartResponseMapper;
@@ -11,6 +12,7 @@ import com.github.sidd6p.store.repositories.CartRepository;
 import com.github.sidd6p.store.repositories.ProductRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -89,20 +91,23 @@ public class CartController {
             return ResponseEntity.badRequest().build();
         }
 
-        var cartItem = cart.getCartItems().stream()
+        var existingCartItem = cart.getCartItems().stream()
                 .filter(item -> item.getProduct().getId().equals(product.getId()))
                 .findFirst()
                 .orElse(null);
 
-        if (cartItem != null) {
-            cartItem.setQuantity(cartItem.getQuantity() + 1);
-        } else {
-           cartItem = new CartItem();
-           cartItem.setQuantity(1);
-           cartItem.setProduct(product);
-           cartItem.setCart(cart);
-           cart.getCartItems().add(cartItem);
+        // If item already exists, return conflict status - don't update quantity
+        if (existingCartItem != null) {
+            log.warn("Item with product ID {} already exists in cart {}", product.getId(), cartID);
+            return ResponseEntity.status(409).build(); // 409 Conflict
         }
+
+        // Only add new items
+        var cartItem = new CartItem();
+        cartItem.setQuantity(1);
+        cartItem.setProduct(product);
+        cartItem.setCart(cart);
+        cart.getCartItems().add(cartItem);
 
         cartRepository.save(cart);
         entityManager.flush();
@@ -118,4 +123,32 @@ public class CartController {
         return ResponseEntity.ok(addItemToCartResponseMapper.toResponse(persistedCartItem));
     }
 
+    @PutMapping("/{cartID}/items/{productId}")
+    @Transactional
+    public ResponseEntity<CartDto> updateCartItemQuantity(@PathVariable UUID cartID, @PathVariable Integer productId, @Valid @RequestBody UpdateCartItemRequest request) {
+        log.info("Updating quantity of product {} in cart {} to {}", productId, cartID, request.getQuantity());
+
+        var cart = cartRepository.findById(cartID).orElse(null);
+        if (cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElse(null);
+
+        if (cartItem == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Update the quantity
+        cartItem.setQuantity(request.getQuantity());
+
+        cartRepository.save(cart);
+        entityManager.flush();
+        entityManager.refresh(cart);
+
+        return ResponseEntity.ok(cartMapper.toDto(cart));
+    }
 }
