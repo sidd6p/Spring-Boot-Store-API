@@ -99,6 +99,25 @@ public class UserServices {
                 .orElse(false);
     }
 
+    public boolean authenticateUser(String email, String password) {
+        log.info("Authenticating user with email: {}", email);
+
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    boolean isPasswordValid = passwordEncoder.matches(password, user.getPassword());
+                    if (isPasswordValid) {
+                        log.info("User authentication successful for email: {}", email);
+                    } else {
+                        log.warn("Invalid password for email: {}", email);
+                    }
+                    return isPasswordValid;
+                })
+                .orElseGet(() -> {
+                    log.warn("User not found with email: {}", email);
+                    return false;
+                });
+    }
+
     // Legacy methods for demonstration purposes - can be kept or moved to a separate demo service
     @Transactional
     public void showEntityStates(){
