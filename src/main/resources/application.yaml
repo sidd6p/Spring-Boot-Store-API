@@ -15,6 +15,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect  # Use MySQL-specific SQL dialect
+  jwt:
+    secret: ${JWT_SECRET}
 stripe:
   enabled: true
   timeout: 1000

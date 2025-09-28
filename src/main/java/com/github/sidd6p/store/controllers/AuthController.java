@@ -1,6 +1,8 @@
 package com.github.sidd6p.store.controllers;
 
+import com.github.sidd6p.store.dtos.JwtResponse;
 import com.github.sidd6p.store.dtos.LoginRequest;
+import com.github.sidd6p.store.services.JwtService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -74,15 +76,17 @@ public class AuthController {
 
     // This contains YOUR AuthenticationProvider from SecurityConfig!
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
         // This one line triggers the entire flow above:
         // Token creation → Your AuthProvider → Your UserServices → Your PasswordEncoder
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
+        var token = jwtService.generateToken(request.getEmail());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new JwtResponse(token));
     }
 }
