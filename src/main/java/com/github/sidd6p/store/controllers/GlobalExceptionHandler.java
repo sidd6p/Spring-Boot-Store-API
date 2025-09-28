@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -166,6 +168,26 @@ public class GlobalExceptionHandler {
                 supportedMethods != null ? String.join(", ", supportedMethods) : "none");
 
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
+    }
+
+    /**
+     * Handles authentication failures such as bad credentials.
+     *
+     * This occurs when:
+     * - User provides incorrect email/password combination during login
+     * - Authentication token is invalid or expired
+     *
+     * Returns 401 Unauthorized with a user-friendly error message.
+     */
+    @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
+    public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException exception) {
+        var errors = new HashMap<String, String>();
+
+        String errorMessage = "Invalid email or password";
+        errors.put("error", errorMessage);
+        log.warn("Authentication failed: {}", exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
     }
 
     /**

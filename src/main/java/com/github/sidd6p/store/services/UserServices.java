@@ -13,17 +13,18 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 @Slf4j
-public class UserServices {
+public class UserServices implements UserDetailsService {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final AddressRepository addressRepository;
@@ -99,24 +100,6 @@ public class UserServices {
                 .orElse(false);
     }
 
-    public boolean authenticateUser(String email, String password) {
-        log.info("Authenticating user with email: {}", email);
-
-        return userRepository.findByEmail(email)
-                .map(user -> {
-                    boolean isPasswordValid = passwordEncoder.matches(password, user.getPassword());
-                    if (isPasswordValid) {
-                        log.info("User authentication successful for email: {}", email);
-                    } else {
-                        log.warn("Invalid password for email: {}", email);
-                    }
-                    return isPasswordValid;
-                })
-                .orElseGet(() -> {
-                    log.warn("User not found with email: {}", email);
-                    return false;
-                });
-    }
 
     // Legacy methods for demonstration purposes - can be kept or moved to a separate demo service
     @Transactional
@@ -171,5 +154,15 @@ public class UserServices {
             addressRepository.deleteAll(user.getAddresses());
             userRepository.delete(user);
         });
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.emptyList() // No roles/authorities for simplicity
+        );
     }
 }
