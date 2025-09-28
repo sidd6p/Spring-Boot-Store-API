@@ -4,13 +4,7 @@ import com.github.sidd6p.store.dtos.AddItemToCartRequest;
 import com.github.sidd6p.store.dtos.AddItemToCartResponse;
 import com.github.sidd6p.store.dtos.CartDto;
 import com.github.sidd6p.store.dtos.UpdateCartItemRequest;
-import com.github.sidd6p.store.entities.Cart;
-import com.github.sidd6p.store.mappers.AddItemToCartResponseMapper;
-import com.github.sidd6p.store.mappers.CartMapper;
-import com.github.sidd6p.store.repositories.CartRepository;
-import com.github.sidd6p.store.repositories.ProductRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
+import com.github.sidd6p.store.services.CartService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,141 +19,66 @@ import java.util.UUID;
 @Slf4j
 @RequestMapping("/carts")
 public class CartController {
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
-    private final CartMapper cartMapper;
-    private final AddItemToCartResponseMapper addItemToCartResponseMapper;
-    private final EntityManager entityManager;
-
+    private final CartService cartService;
 
     @GetMapping("/{cartID}")
     public ResponseEntity<CartDto> getCartById(@PathVariable UUID cartID) {
-        log.info("Fetching cart with ID: {}", cartID);
-        var cart = cartRepository.findById(cartID).orElse(null);
-        if (cart == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(cartMapper.toDto(cart));
+        return cartService.getCartById(cartID)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-
     @PostMapping()
-    /**
-     * @Transactional is REQUIRED here because we're using EntityManager directly instead of repository.save()
-     *
-     * Without @Transactional: All EntityManager operations below would throw TransactionRequiredException
-     *
-     * Makes this function act as ATOMIC SQL Transaction - either ALL operations succeed or ALL fail (rollback)
-     *
-     * Why we use this 3-step approach:
-     * 1. persist(cart) - Makes JPA track this new entity (doesn't hit DB yet)
-     * 2. flush() - Forces immediate SQL execution to get auto-generated ID and timestamps
-     * 3. refresh(cart) - Reloads entity from DB to populate generated fields (id, dateCreated, etc.)
-     *
-     * Alternative: cartRepository.save(cart) would handle all this automatically but we need
-     * immediate access to generated values for logging and response building
-     */
-    @Transactional
     public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriComponentsBuilder) {
-        log.info("Creating a new cart");
-
-        var cart = new Cart();
-
-        entityManager.persist(cart);
-        entityManager.flush();
-        entityManager.refresh(cart);
-
-        var cart_id = cart.getId();
-
-        var uri = uriComponentsBuilder.path("/carts/{id}").buildAndExpand(cart.getId()).toUri();
-        return ResponseEntity.created(uri).body(cartMapper.toDto(cart));
+        var cartDto = cartService.createCart();
+        var uri = uriComponentsBuilder.path("/carts/{id}")
+                .buildAndExpand(cartDto.getId())
+                .toUri();
+        return ResponseEntity.created(uri).body(cartDto);
     }
 
     @PostMapping("/{cartID}/items")
-    @Transactional
-    public ResponseEntity<AddItemToCartResponse> addToCart(@PathVariable UUID cartID, @RequestBody AddItemToCartRequest addItemToCartRequest) {
-        log.info("Adding item to cart with ID: {}", cartID);
-
-        var cart = cartRepository.findById(cartID).orElse(null);
-        if (cart == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        var product = productRepository.findById(addItemToCartRequest.getProductId()).orElse(null);
-        if (product == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        // Use Cart's addProduct method which handles duplicate checking internally
+    public ResponseEntity<AddItemToCartResponse> addToCart(@PathVariable UUID cartID,
+                                                          @RequestBody AddItemToCartRequest addItemToCartRequest) {
         try {
-            var cartItem = cart.addProduct(product);
-
-            cartRepository.save(cart);
-            entityManager.flush();
-            entityManager.refresh(cart);
-
-            // Find the persisted cartItem to get its generated ID
-            var persistedCartItem = cart.findCartItemByProductId(product.getId())
-                    .orElse(cartItem);
-
-            return ResponseEntity.ok(addItemToCartResponseMapper.toResponse(persistedCartItem));
+            return cartService.addToCart(cartID, addItemToCartRequest)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (IllegalStateException e) {
-            log.warn("Failed to add product to cart: {}", e.getMessage());
             return ResponseEntity.status(409).build();
         }
     }
 
     @PutMapping("/{cartID}/items/{productId}")
-    @Transactional
-    public ResponseEntity<CartDto> updateCartItemQuantity(@PathVariable UUID cartID, @PathVariable Integer productId, @Valid @RequestBody UpdateCartItemRequest request) {
-        log.info("Updating quantity of product {} in cart {} to {}", productId, cartID, request.getQuantity());
-
-        var cart = cartRepository.findById(cartID).orElse(null);
-        if (cart == null) {
+    public ResponseEntity<CartDto> updateCartItemQuantity(@PathVariable UUID cartID,
+                                                         @PathVariable Integer productId,
+                                                         @Valid @RequestBody UpdateCartItemRequest request) {
+        try {
+            return cartService.updateCartItemQuantity(cartID, productId, request)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
-
-        // Use Cart's business logic method instead of controller logic
-        if (!cart.updateProductQuantity(productId, request.getQuantity())) {
-            return ResponseEntity.notFound().build();
-        }
-
-        cartRepository.save(cart);
-        entityManager.flush();
-        entityManager.refresh(cart);
-
-        return ResponseEntity.ok(cartMapper.toDto(cart));
     }
 
     @DeleteMapping("/{cartID}/items/{productId}")
-    @Transactional
     public ResponseEntity<Void> removeCartItem(@PathVariable UUID cartID, @PathVariable Integer productId) {
-        log.info("Removing product {} from cart {}", productId, cartID);
-        var cart = cartRepository.findById(cartID).orElse(null);
-        if (cart == null) {
+        if (cartService.removeCartItem(cartID, productId)) {
+            return ResponseEntity.noContent().build();
+        } else {
             return ResponseEntity.notFound().build();
         }
-        if (!cart.removeProduct(productId)) {
-            return ResponseEntity.notFound().build();
-        }
-        cartRepository.save(cart);
-        entityManager.flush();
-        entityManager.refresh(cart);
-        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{cartID}/items")
-    @Transactional
     public ResponseEntity<Void> clearCart(@PathVariable UUID cartID) {
-        log.info("Clearing all items from cart {}", cartID);
-        var cart = cartRepository.findById(cartID).orElse(null);
-        if (cart == null) {
+        if (cartService.clearCart(cartID)) {
+            return ResponseEntity.noContent().build();
+        } else {
             return ResponseEntity.notFound().build();
         }
-        cart.clearCart();
-        cartRepository.save(cart);
-        entityManager.flush();
-        entityManager.refresh(cart);
-        return ResponseEntity.noContent().build();
     }
 }

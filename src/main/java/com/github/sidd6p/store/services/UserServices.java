@@ -1,33 +1,102 @@
 package com.github.sidd6p.store.services;
 
+import com.github.sidd6p.store.dtos.ChangePasswordRequest;
+import com.github.sidd6p.store.dtos.RegisterUserRequest;
+import com.github.sidd6p.store.dtos.UpdateUserRequest;
+import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.entities.Address;
 import com.github.sidd6p.store.entities.User;
+import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.*;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServices {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final AddressRepository addressRepository;
-
+    private final UserMapper userMapper;
     private final EntityManager entityManager;
 
-    /**
-     * The showEntityStates function demonstrates the concept of JPA entity states (transient, managed/persistent, detached)
-     * by checking if a User entity is managed by the EntityManager before and after saving it.
-     *
-     * The @Transactional annotation is used to define a transactional boundary, ensuring that all operations
-     * within the method are executed within a single database transaction. This is important for operations
-     * that require atomicity and consistency, such as multiple database updates or lazy loading of entities.
-     *
-     */
+    public List<UserDto> getAllUsers(String sortBy) {
+        if (!Set.of("id", "name", "email").contains(sortBy)) {
+            sortBy = "id";
+        }
+        log.info("Getting all users sorted by: {}", sortBy);
+        return userRepository.findAll(Sort.by(sortBy).ascending()).stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+
+    public Optional<UserDto> getUserById(long id) {
+        log.info("Getting user with id: {}", id);
+        return userRepository.findById(id)
+                .map(userMapper::toDto);
+    }
+
+    public UserDto createUser(RegisterUserRequest registerUserRequest) {
+        log.info("Creating user with details: {}", registerUserRequest);
+
+        if (userRepository.existsByEmail(registerUserRequest.getEmail())) {
+            log.error("User with email {} already exists", registerUserRequest.getEmail());
+            throw new IllegalArgumentException("User with this email already exists");
+        }
+
+        var user = userMapper.toEntity(registerUserRequest);
+        userRepository.save(user);
+
+        return userMapper.toDto(user);
+    }
+
+    public Optional<UserDto> updateUser(long id, UpdateUserRequest userUpdateRequest) {
+        log.info("Updating user with id {} with details: {}", id, userUpdateRequest);
+
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.updateFromRequest(userUpdateRequest.getUser_name(), userUpdateRequest.getEmail());
+                    userRepository.save(user);
+                    return userMapper.toDto(user);
+                });
+    }
+
+    public boolean deleteUser(long id) {
+        log.info("Deleting user with id {}", id);
+
+        return userRepository.findById(id)
+                .map(user -> {
+                    userRepository.delete(user);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    public boolean changePassword(long id, ChangePasswordRequest changePasswordRequest) {
+        log.info("Updating password for user with id {}", id);
+
+        return userRepository.findById(id)
+                .map(user -> {
+                    if (user.changePassword(changePasswordRequest.getOldPassword(),
+                                          changePasswordRequest.getNewPassword())) {
+                        userRepository.save(user);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+
+    // Legacy methods for demonstration purposes - can be kept or moved to a separate demo service
     @Transactional
     public void showEntityStates(){
         var user1 = User.builder()
@@ -58,12 +127,6 @@ public class UserServices {
         addressRepository.findById(1L).ifPresent(System.out::println);
     }
 
-    /**
-     * The @Transactional annotation is used here to ensure that the persistence of the User and Address entities,
-     * as well as the management of their relationship, occurs within a single database transaction. This guarantees
-     * atomicity and consistency, so that either all changes are committed together or none are, preventing partial updates
-     * in case of an error. It is especially important when persisting related entities and their associations.
-     */
     @Transactional
     public void persistRelated() {
         var user = User.builder()
@@ -80,14 +143,9 @@ public class UserServices {
         userRepository.save(user);
     }
 
-    /**
-     * The @Transactional annotation is added to the deleteRelated() method to ensure that the method runs within an active
-     * Hibernate session, fixing the LazyInitializationException. This guarantees that the User and Address entities
-     * are properly loaded and managed within the transaction, allowing for their correct deletion.
-     */
     @Transactional
     public void deleteRelated() {
-        userRepository.findById(1L).ifPresent(user -> {;
+        userRepository.findById(1L).ifPresent(user -> {
             addressRepository.deleteAll(user.getAddresses());
             userRepository.delete(user);
         });

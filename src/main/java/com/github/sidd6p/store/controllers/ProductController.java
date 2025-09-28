@@ -3,9 +3,7 @@ package com.github.sidd6p.store.controllers;
 
 import com.github.sidd6p.store.dtos.ProductDto;
 import com.github.sidd6p.store.dtos.RegisterProductRequest;
-import com.github.sidd6p.store.entities.Category;
-import com.github.sidd6p.store.mappers.ProductMapper;
-import com.github.sidd6p.store.repositories.ProductRepository;
+import com.github.sidd6p.store.services.ProductServices;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,87 +18,48 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class ProductController {
-
-    private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
-
+    private final ProductServices productServices;
 
     @GetMapping()
     public List<ProductDto> getAllProducts(@RequestParam(required = false, name = "category") String category) {
-        if (category != null && !category.isEmpty()) {
-            log.info("Fetching products for category: {}", category);
-            return productRepository.findByCategoryNameWithCategory(category).stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        } else {
-            log.info("Fetching all products");
-            return productRepository.findAll().stream()
-                    .map(productMapper::toDto)
-                    .toList();
-        }
+        return productServices.getAllProducts(category);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Integer id) {
-        log.info("Fetching product by id: {}", id);
-        return productRepository.findById(id)
-                .map(productMapper::toDto)
+        return productServices.getProductById(id)
                 .map(ResponseEntity::ok)
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping()
-    public ResponseEntity<ProductDto> createProduct(@RequestBody RegisterProductRequest registerProductRequest, UriComponentsBuilder uriBuilder) {
-       log.info("Creating product with details: {}", registerProductRequest);
-        var product = productMapper.toEntity(registerProductRequest);
-        productRepository.save(product);
+    public ResponseEntity<ProductDto> createProduct(@RequestBody RegisterProductRequest registerProductRequest,
+                                                   UriComponentsBuilder uriBuilder) {
+        var productDto = productServices.createProduct(registerProductRequest);
         var uri = uriBuilder.path("/products/{id}")
-                .buildAndExpand(product.getId())
+                .buildAndExpand(productDto.getId())
                 .toUri();
-        var productDto = productMapper.toDto(product);
         return ResponseEntity.created(uri).body(productDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProductDto> deleteProductById(@PathVariable("id") Integer id) {
-        log.info("Deleting product by id: {}", id);
-        var product = productRepository.findById(id).orElse(null);
-        if (product == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            productRepository.delete(product);
+    public ResponseEntity<Void> deleteProductById(@PathVariable("id") Integer id) {
+        if (productServices.deleteProductById(id)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Integer id, @RequestBody RegisterProductRequest registerProductRequest) {
-        log.info("Updating product with id: {} with details: {}", id, registerProductRequest);
-        var product = productRepository.findById(id).orElse(null);
-        if (product == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            // Handle category update if category_id is provided
-            Category categoryToSet = null;
-            if (registerProductRequest.getCategory_id() != null) {
-                var updatedProduct = productMapper.toEntity(registerProductRequest);
-                if (updatedProduct.getCategory() == null) {
-                    log.info("Invalid category_id provided for product update: {}", registerProductRequest.getCategory_id());
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-                categoryToSet = updatedProduct.getCategory();
-            }
-
-            // Use Product's business logic method instead of setting fields directly
-            product.updateFromRequest(
-                registerProductRequest.getName(),
-                registerProductRequest.getPrice(),
-                categoryToSet
-            );
-
-            productRepository.save(product);
-            return ResponseEntity.ok(productMapper.toDto(product));
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Integer id,
+                                                   @RequestBody RegisterProductRequest registerProductRequest) {
+        try {
+            return productServices.updateProduct(id, registerProductRequest)
+                    .map(ResponseEntity::ok)
+                    .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
 }
