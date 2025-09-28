@@ -5,6 +5,8 @@ import com.github.sidd6p.store.dtos.RegisterUserRequest;
 import com.github.sidd6p.store.dtos.UpdateUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.services.UserServices;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +23,18 @@ import java.util.Map;
 @AllArgsConstructor
 @RequestMapping("/users")
 @Slf4j
+@Tag(name = "User Management", description = "APIs for managing users")
 public class UserController {
     private final UserServices userServices;
 
     @GetMapping()
+    @Operation(summary = "Get all users", description = "Retrieve a list of all users, optionally sorted by a specified field.")
     public List<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
         return userServices.getAllUsers(sortBy);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get user by ID", description = "Retrieve a specific user by their ID.")
     public ResponseEntity<UserDto> getUserById(@PathVariable("id") long id) {
         return userServices.getUserById(id)
                 .map(ResponseEntity::ok)
@@ -37,6 +42,7 @@ public class UserController {
     }
 
     @PostMapping()
+    @Operation(summary = "Create new user", description = "Register a new user in the system.")
     public ResponseEntity<Object> createUser(@RequestHeader("x-auth-token") String authToken,
                                               @Valid @RequestBody RegisterUserRequest registerUserRequest,
                                               UriComponentsBuilder uriBuilder) {
@@ -50,6 +56,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update user", description = "Update an existing user's information.")
     public ResponseEntity<UserDto> updateUser(@RequestHeader("x-auth-token") String authToken,
                                               @PathVariable long id,
                                               @RequestBody UpdateUserRequest userUpdateRequest) {
@@ -59,6 +66,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete user", description = "Remove a user from the system.")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) {
         if (userServices.deleteUser(id)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -68,6 +76,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/change-password")
+    @Operation(summary = "Change user password", description = "Update a user's password.")
     public ResponseEntity<Void> updatePassword(@PathVariable("id") long id,
                                                @Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
         if (userServices.changePassword(id, changePasswordRequest)) {
