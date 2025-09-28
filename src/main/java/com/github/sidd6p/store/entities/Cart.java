@@ -27,7 +27,7 @@ public class Cart {
     @Column(name = "date_created", insertable = false, updatable = false)
     private LocalDate dateCreated;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<CartItem> cartItems = new LinkedHashSet<>();
 
@@ -76,6 +76,20 @@ public class Cart {
         Optional<CartItem> cartItem = findCartItemByProductId(productId);
         if (cartItem.isPresent()) {
             cartItem.get().setQuantity(newQuantity);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes a product from the cart
+     * @param productId the ID of the product to remove
+     * @return true if the product was found and removed, false otherwise
+     */
+    public boolean removeProduct(Integer productId) {
+        Optional<CartItem> cartItemToRemove = findCartItemByProductId(productId);
+        if (cartItemToRemove.isPresent()) {
+            cartItems.remove(cartItemToRemove.get());
             return true;
         }
         return false;

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -139,6 +140,32 @@ public class GlobalExceptionHandler {
         log.warn("Resource not found: {}", resourcePath);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
+    }
+
+    /**
+     * Handles HttpRequestMethodNotSupportedException when an unsupported HTTP method is used.
+     *
+     * This occurs when:
+     * - A request is made using an HTTP method that is not supported by the endpoint
+     * - For example, sending DELETE to an endpoint that only supports GET/POST
+     *
+     * Returns 405 Method Not Allowed without exposing supported methods for security reasons.
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, String>> handleMethodNotSupported(HttpRequestMethodNotSupportedException exception) {
+        var errors = new HashMap<String, String>();
+
+        String method = exception.getMethod();
+        String[] supportedMethods = exception.getSupportedMethods();
+
+        String errorMessage = String.format("HTTP method '%s' is not supported for this endpoint", method);
+        errors.put("error", errorMessage);
+
+        // Log supported methods for debugging but don't expose them in the response for security
+        log.warn("Unsupported HTTP method '{}' attempted. Supported methods: {}", method,
+                supportedMethods != null ? String.join(", ", supportedMethods) : "none");
+
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
     }
 
     /**
