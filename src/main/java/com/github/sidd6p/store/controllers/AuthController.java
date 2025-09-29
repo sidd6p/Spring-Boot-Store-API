@@ -2,12 +2,17 @@ package com.github.sidd6p.store.controllers;
 
 import com.github.sidd6p.store.dtos.JwtResponse;
 import com.github.sidd6p.store.dtos.LoginRequest;
+import com.github.sidd6p.store.dtos.UserDto;
+import com.github.sidd6p.store.mappers.UserMapper;
+import com.github.sidd6p.store.repositories.UserRepository;
 import com.github.sidd6p.store.services.JwtService;
+import com.github.sidd6p.store.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -74,6 +79,8 @@ public class AuthController {
     // This contains YOUR AuthenticationProvider from SecurityConfig!
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -110,5 +117,21 @@ public class AuthController {
         } else {
             return ResponseEntity.status(401).body(false);
         }
+    }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getCurrentUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        String email = authentication.getPrincipal().toString();
+        var user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        var userDto = userMapper.toDto(user);
+        return ResponseEntity.ok(userDto);
     }
 }
