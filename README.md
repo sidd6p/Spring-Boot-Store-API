@@ -3,7 +3,8 @@
 This is a Spring Boot REST API project that I've built while learning Java Spring Boot
 following [Code with Mosh Spring Boot tutorials](https://members.codewithmosh.com/courses).
 > The primary focus is on mastering JPA, Spring Data, and Java core concepts rather than creating a fully functional
-> e-commerce store. The project demonstrates modern Spring Boot development practices with database integration and clean
+> e-commerce store. The project demonstrates modern Spring Boot development practices with database integration and
+> clean
 > architecture patterns.
 
 ## Table of Contents

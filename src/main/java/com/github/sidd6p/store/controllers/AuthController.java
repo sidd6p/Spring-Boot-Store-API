@@ -130,6 +130,23 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refreshToken(@CookieValue(value = "refreshToken") String refreshToken) {
+        if (refreshToken == null || refreshToken.trim().isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        if (!jwtService.validateToken(refreshToken)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        var user = userRepository.findById(userId).orElseThrow();
+        var newAccessToken = jwtService.generateAccessToken(user);
+
+        return ResponseEntity.ok(new JwtResponse(newAccessToken));
+    }
+
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser() {

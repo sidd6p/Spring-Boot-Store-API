@@ -27,19 +27,19 @@
 
 /**
  * Note on Auto-Configuration vs. Custom Configuration:
- *
+ * <p>
  * When the 'spring-boot-starter-security' dependency is included in the pom.xml, Spring Boot
  * automatically enables security. If no custom configuration like this class is found, Spring
  * applies its default security rules:
  * - All endpoints are protected.
  * - A default login form is generated for authentication (stateful, session-based).
- *
+ * <p>
  * By creating this 'SecurityConfig' class and defining our own 'SecurityFilterChain' bean, we are
  * explicitly overriding Spring's default behavior. This custom configuration is designed for a
  * stateless REST API, which is why:
  * 1. We set the session creation policy to STATELESS.
  * 2. We do not configure a form login (`.formLogin()`).
- *
+ * <p>
  * As a result, the auto-generated login page disappears. Instead of sessions, the application now
  * expects authentication credentials (like a JWT or Bearer Token) to be sent in the 'Authorization'
  * header of every request to a protected endpoint. If the credentials are missing or invalid, the
@@ -85,6 +85,7 @@ public class SecurityConfig {
                         .requestMatchers("/v2/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
