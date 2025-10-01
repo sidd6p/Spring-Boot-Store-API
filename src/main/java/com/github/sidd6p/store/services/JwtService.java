@@ -1,6 +1,7 @@
 package com.github.sidd6p.store.services;
 
 import com.github.sidd6p.store.config.JwtConfig;
+import com.github.sidd6p.store.entities.Role;
 import com.github.sidd6p.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -51,5 +52,10 @@ public class JwtService {
 
     public Long getUserIdFromToken(String token) {
         return Long.valueOf(getClaims(token).getSubject());
+    }
+
+    public Role getRoleFromToken(String token) {
+        String role = getClaims(token).get("role", String.class);
+        return Role.valueOf(role);
     }
 }
