@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "fe5176f7-321e-4575-bd92-f410371113d6",
+		"_postman_id": "34a5df93-f842-4371-b3e5-d4220b8521eb",
 		"name": "Spring-Boot-Store-API",
 		"description": "Complete API documentation for the Spring Boot Store application. This collection includes endpoints for user management, product catalog, shopping cart, authentication, and admin operations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -9,7 +9,6 @@
 	"item": [
 		{
 			"name": "Home",
-			"description": "Home page endpoints for the web application.",
 			"item": [
 				{
 					"name": "Home",
@@ -29,11 +28,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Home page endpoints for the web application."
 		},
 		{
 			"name": "Message",
-			"description": "Simple message endpoints demonstrating different response types.",
 			"item": [
 				{
 					"name": "Message V1",
@@ -73,11 +72,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Simple message endpoints demonstrating different response types."
 		},
 		{
 			"name": "Authentication",
-			"description": "Authentication and authorization endpoints for user login, token validation, and session management using JWT tokens.",
 			"item": [
 				{
 					"name": "Login",
@@ -193,11 +192,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Authentication and authorization endpoints for user login, token validation, and session management using JWT tokens."
 		},
 		{
 			"name": "User Management",
-			"description": "APIs for managing users including CRUD operations and password management.",
 			"item": [
 				{
 					"name": "Get All Users",
@@ -251,8 +250,8 @@
 							{
 								"key": "x-auth-token",
 								"value": "asfgfdv",
-								"type": "string",
-								"description": "Custom authentication token header"
+								"description": "Custom authentication token header",
+								"type": "string"
 							},
 							{
 								"key": "Content-Type",
@@ -290,8 +289,8 @@
 							{
 								"key": "x-auth-token",
 								"value": "asfgfdv",
-								"type": "string",
-								"description": "Custom authentication token header"
+								"description": "Custom authentication token header",
+								"type": "string"
 							},
 							{
 								"key": "Content-Type",
@@ -376,11 +375,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "APIs for managing users including CRUD operations and password management."
 		},
 		{
 			"name": "Product",
-			"description": "Product management APIs for CRUD operations on products and filtering by category.",
 			"item": [
 				{
 					"name": "Get All Products",
@@ -434,8 +433,8 @@
 							{
 								"key": "x-auth-token",
 								"value": "asfgfdv",
-								"type": "string",
-								"description": "Custom authentication token header"
+								"description": "Custom authentication token header",
+								"type": "string"
 							},
 							{
 								"key": "Content-Type",
@@ -473,8 +472,8 @@
 							{
 								"key": "x-auth-token",
 								"value": "asfgfdv",
-								"type": "string",
-								"description": "Custom authentication token header"
+								"description": "Custom authentication token header",
+								"type": "string"
 							},
 							{
 								"key": "Content-Type",
@@ -513,8 +512,8 @@
 							{
 								"key": "x-auth-token",
 								"value": "asfgfdv",
-								"type": "string",
-								"description": "Custom authentication token header"
+								"description": "Custom authentication token header",
+								"type": "string"
 							}
 						],
 						"url": {
@@ -531,11 +530,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Product management APIs for CRUD operations on products and filtering by category."
 		},
 		{
 			"name": "Cart Management",
-			"description": "APIs for managing shopping carts including adding, updating, and removing items.",
 			"item": [
 				{
 					"name": "Create Cart",
@@ -558,16 +557,26 @@
 				{
 					"name": "Get Cart by ID",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiI5MyIsImVtYWlsIjoidGVzdEBkdW1teS5jb20iLCJuYW1lIjoiVGVzdFVzZXIxMjMiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc1OTM0ODc0NCwiZXhwIjoxNzYwMjEyNzQ0fQ.7od_Msedzit708JSHMIm3Y8dDbBfTKt4E3L_pXzhpP1xKoHRic2ouhYfw5qnEbfq",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/carts/118414cc-59a8-4eea-9c1f-d8d2501350c5",
+							"raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"carts",
-								"118414cc-59a8-4eea-9c1f-d8d2501350c5"
+								"6a0c85c5-d498-4416-a1ab-2054f582040b"
 							]
 						},
 						"description": "Retrieve a shopping cart by its ID.\n\n**Path Parameters:**\n- `cartID` (required): Cart UUID\n\n**Response Example:**\n```json\n{\n  \"id\": \"118414cc-59a8-4eea-9c1f-d8d2501350c5\",\n  \"items\": [\n    {\n      \"productId\": 14,\n      \"quantity\": 2,\n      \"price\": 99.99,\n      \"subtotal\": 199.98\n    }\n  ],\n  \"total\": 199.98\n}\n```\n\n**Status Codes:**\n- 200: Cart retrieved successfully\n- 404: Cart not found"
@@ -686,11 +695,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "APIs for managing shopping carts including adding, updating, and removing items."
 		},
 		{
 			"name": "Admin",
-			"description": "Admin-only endpoints with restricted access. These endpoints require ADMIN role.",
 			"item": [
 				{
 					"name": "Hello",
@@ -708,6 +717,48 @@
 							]
 						},
 						"description": "Test endpoint for admin access verification. Only accessible to users with ADMIN role.\n\n**Authentication:** Required (Admin role)\n\n**Response:**\n```\nAdmin endpoint - access restricted to ADMIN role\n```\n\n**Status Codes:**\n- 200: Access granted (user has ADMIN role)\n- 403: Forbidden (user doesn't have ADMIN role)"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin-only endpoints with restricted access. These endpoints require ADMIN role."
+		},
+		{
+			"name": "Checkout",
+			"item": [
+				{
+					"name": "Checkout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiI5MyIsImVtYWlsIjoidGVzdEBkdW1teS5jb20iLCJuYW1lIjoiVGVzdFVzZXIxMjMiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc1OTM0ODc0NCwiZXhwIjoxNzYwMjEyNzQ0fQ.7od_Msedzit708JSHMIm3Y8dDbBfTKt4E3L_pXzhpP1xKoHRic2ouhYfw5qnEbfq",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cartId\": \"2e1726e4-a727-4e76-8f0d-230cd7a1b127\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/checkout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"checkout"
+							]
+						}
 					},
 					"response": []
 				}

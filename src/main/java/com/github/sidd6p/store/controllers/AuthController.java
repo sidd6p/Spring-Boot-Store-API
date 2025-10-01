@@ -6,6 +6,7 @@ import com.github.sidd6p.store.dtos.LoginRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
+import com.github.sidd6p.store.services.AuthService;
 import com.github.sidd6p.store.services.Jwt;
 import com.github.sidd6p.store.services.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +18,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -88,6 +88,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtConfig jwtConfig;
+    private final AuthService authService;
 
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticate user with email and password, returns JWT access token and sets refresh token cookie")
@@ -157,12 +158,7 @@ public class AuthController {
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Retrieve the profile information of the currently authenticated user")
     public ResponseEntity<UserDto> getCurrentUser() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getPrincipal() == null) {
-            return ResponseEntity.status(401).build();
-        }
-        Long userID = (Long) authentication.getPrincipal();
-        var user = userRepository.findById(userID).orElse(null);
+        var user = authService.getCurrentUser();
         if (user == null) {
             return ResponseEntity.status(401).build();
         }

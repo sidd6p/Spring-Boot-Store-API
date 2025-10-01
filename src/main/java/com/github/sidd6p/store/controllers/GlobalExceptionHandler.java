@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -118,6 +119,45 @@ public class GlobalExceptionHandler {
 
         errors.put(parameterName, errorMessage);
         log.warn("Method argument type mismatch: {}", errorMessage);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    /**
+     * Handles HttpMessageNotReadableException when the request body cannot be read or deserialized.
+     * <p>
+     * This commonly occurs when:
+     * - Invalid JSON syntax is provided in the request body
+     * - JSON contains values that cannot be converted to the expected types (e.g., invalid UUID format)
+     * - Required fields are missing or malformed
+     * <p>
+     * Example scenarios:
+     * - POST /checkout with cartId: "invalid-uuid" -> 400 Bad Request instead of 500 Internal Server Error
+     * - POST /checkout with malformed JSON -> 400 Bad Request with clear message
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
+        var errors = new HashMap<String, String>();
+
+        String errorMessage = "Invalid request body";
+
+        // Extract more specific error message if available
+        Throwable cause = exception.getCause();
+        if (cause != null) {
+            String causeMessage = cause.getMessage();
+            if (causeMessage != null) {
+                // Check if it's a UUID deserialization error
+                if (causeMessage.contains("UUID") && causeMessage.contains("standard 36-char representation")) {
+                    errorMessage = "Invalid UUID format in request body";
+                } else if (causeMessage.contains("Cannot deserialize")) {
+                    // Extract field name from error message if possible
+                    errorMessage = "Invalid data format in request body";
+                }
+            }
+        }
+
+        errors.put("error", errorMessage);
+        log.warn("HTTP message not readable: {}", exception.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }

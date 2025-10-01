@@ -46,7 +46,8 @@ public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriBuilder) {
 The `save()` method is a wrapper that internally uses `EntityManager`. It's simpler for standard CRUD.
 
 ```java
-public interface CartRepository extends JpaRepository<Cart, UUID> { }
+public interface CartRepository extends JpaRepository<Cart, UUID> {
+}
 
 // How you would use it:
 var cart = new Cart();
