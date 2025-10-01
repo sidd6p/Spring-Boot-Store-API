@@ -89,7 +89,8 @@ public class AuthController {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-        var token = jwtService.generateToken(request.getEmail());
+        var user = userRepository.findByEmail(request.email).orElseThrow();
+        var token = jwtService.generateToken(user);
 
         return ResponseEntity.ok(new JwtResponse(token));
     }
@@ -126,8 +127,8 @@ public class AuthController {
         if (authentication == null || authentication.getPrincipal() == null) {
             return ResponseEntity.status(401).build();
         }
-        String email = authentication.getPrincipal().toString();
-        var user = userRepository.findByEmail(email).orElse(null);
+        Long userID = (Long) authentication.getPrincipal();
+        var user = userRepository.findById(userID).orElse(null);
         if (user == null) {
             return ResponseEntity.status(401).build();
         }

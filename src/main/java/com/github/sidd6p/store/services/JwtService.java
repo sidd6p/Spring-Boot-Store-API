@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.services;
 
+import com.github.sidd6p.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,9 +13,12 @@ import java.util.Date;
 public class JwtService {
     @Value("${spring.jwt.secret}")
     private String secret;
-    public String generateToken(String email) {
+    public String generateToken(User user) {
         final long expirationTime = 86400000; // 1 day in milliseconds
-        return Jwts.builder().subject(email).issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expirationTime))
+        return Jwts.builder().subject(user.getId().toString())
+                .claim("email", user.getEmail())
+                .claim("name", user.getName())
+                .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                 .compact();
     }
@@ -36,8 +40,8 @@ public class JwtService {
         }
     }
 
-    public String getEmailFromToken(String token) {
-        return getClaims(token).getSubject();
+    public Long getUserIdFromToken(String token) {
+        return Long.valueOf(getClaims(token).getSubject());
     }
 
 }
