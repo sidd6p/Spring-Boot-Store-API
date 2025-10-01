@@ -95,3 +95,30 @@ CREATE TABLE
     CONSTRAINT `cart_items_relation_1` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`),
     CONSTRAINT `cart_items_relation_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE
+  `orders` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `customer_id` bigint NOT NULL,
+    `status` varchar(20) NOT NULL,
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `total_price` decimal(10, 2) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `orders_customer_id_fk` (`customer_id`),
+    CONSTRAINT `orders_customer_id_fk` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`)
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE TABLE
+  `order_items` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `order_id` bigint NOT NULL,
+    `product_id` int unsigned NOT NULL,
+    `unit_price` decimal(10, 2) NOT NULL,
+    `quantity` int NOT NULL,
+    `total_price` decimal(10, 2) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `order_items_orders_id_fk` (`order_id`),
+    KEY `order_items_products_id_fk` (`product_id`),
+    CONSTRAINT `order_items_orders_id_fk` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
+    CONSTRAINT `order_items_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
+  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
