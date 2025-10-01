@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.controllers;
 
+import com.github.sidd6p.store.config.JwtConfig;
 import com.github.sidd6p.store.dtos.JwtResponse;
 import com.github.sidd6p.store.dtos.LoginRequest;
 import com.github.sidd6p.store.dtos.UserDto;
@@ -82,6 +83,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final JwtConfig jwtConfig;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
@@ -96,7 +98,7 @@ public class AuthController {
         var cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/auth/refresh");
-        cookie.setMaxAge(864000);
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());
         cookie.setSecure(false); // in production this should be true, ensure cookies are sent over HTTPS
         response.addCookie(cookie);
 

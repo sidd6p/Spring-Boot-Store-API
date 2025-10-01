@@ -1,41 +1,39 @@
 package com.github.sidd6p.store.services;
 
+import com.github.sidd6p.store.config.JwtConfig;
 import com.github.sidd6p.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
+@AllArgsConstructor
 public class JwtService {
-    @Value("${spring.jwt.secret}")
-    private String secret;
+    private final JwtConfig jwtConfig;
+
     public String generateAccessToken(User user) {
-        final long expirationTime = 600; // 1 day in milliseconds
-        return getToken(user, expirationTime);
+        return getToken(user, jwtConfig.getAccessTokenExpiration() * 1000L); // Convert seconds to milliseconds
     }
 
     public String generateRefreshToken(User user) {
-        final long expirationTime = 864000; // 1 day in milliseconds
-        return getToken(user, expirationTime);
+        return getToken(user, jwtConfig.getRefreshTokenExpiration() * 1000L); // Convert seconds to milliseconds
     }
 
-
-    private String getToken(User user, long expirationTime) {
+    private String getToken(User user, long expirationTimeInMillis) {
         return Jwts.builder().subject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
-                .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expirationTimeInMillis))
+                .signWith(jwtConfig.getSecretKey())
                 .compact();
     }
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .verifyWith(jwtConfig.getSecretKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -53,5 +51,4 @@ public class JwtService {
     public Long getUserIdFromToken(String token) {
         return Long.valueOf(getClaims(token).getSubject());
     }
-
 }
