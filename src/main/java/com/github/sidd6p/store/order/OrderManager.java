@@ -19,7 +19,7 @@ public class OrderManager {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         System.out.println("Order service initialized");
     }
 

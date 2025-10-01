@@ -40,7 +40,7 @@ public class ProductController {
     @PostMapping()
     @Operation(summary = "Create new product", description = "Register a new product in the system.")
     public ResponseEntity<ProductDto> createProduct(@RequestBody RegisterProductRequest registerProductRequest,
-                                                   UriComponentsBuilder uriBuilder) {
+                                                    UriComponentsBuilder uriBuilder) {
         var productDto = productService.createProduct(registerProductRequest);
         var uri = uriBuilder.path("/products/{id}")
                 .buildAndExpand(productDto.getId())
@@ -61,7 +61,7 @@ public class ProductController {
     @PutMapping("/{id}")
     @Operation(summary = "Update product", description = "Update an existing product's information.")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Integer id,
-                                                   @RequestBody RegisterProductRequest registerProductRequest) {
+                                                    @RequestBody RegisterProductRequest registerProductRequest) {
         try {
             return productService.updateProduct(id, registerProductRequest)
                     .map(ResponseEntity::ok)

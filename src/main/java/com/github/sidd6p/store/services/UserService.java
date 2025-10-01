@@ -7,7 +7,9 @@ import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.entities.Address;
 import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.mappers.UserMapper;
-import com.github.sidd6p.store.repositories.*;
+import com.github.sidd6p.store.repositories.AddressRepository;
+import com.github.sidd6p.store.repositories.ProfileRepository;
+import com.github.sidd6p.store.repositories.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -19,7 +21,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -91,7 +96,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id)
                 .map(user -> {
                     if (user.changePassword(changePasswordRequest.getOldPassword(),
-                                          changePasswordRequest.getNewPassword())) {
+                            changePasswordRequest.getNewPassword())) {
                         userRepository.save(user);
                         return true;
                     }
@@ -103,7 +108,7 @@ public class UserService implements UserDetailsService {
 
     // Legacy methods for demonstration purposes - can be kept or moved to a separate demo service
     @Transactional
-    public void showEntityStates(){
+    public void showEntityStates() {
         var user1 = User.builder()
                 .name("Siddharth Purwar")
                 .email("siddpurwar@gmail.com")

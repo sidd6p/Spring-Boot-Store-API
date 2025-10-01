@@ -1,6 +1,5 @@
 package com.github.sidd6p.store.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +8,10 @@ import lombok.Getter;
 @Getter
 public class UserDto {
 
-//    @JsonIgnore
+    //    @JsonIgnore
     private long id;
 
     @JsonProperty("user_name")
     private String name;
-    private  String email;
+    private String email;
 }

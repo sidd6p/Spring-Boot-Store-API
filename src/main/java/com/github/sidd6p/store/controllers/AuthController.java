@@ -21,56 +21,56 @@ import org.springframework.web.bind.annotation.*;
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │                        AUTHENTICATION FLOW                             │
  * └─────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │ SPRING BOOT STARTUP: How beans connect                                 │
  * └─────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * PasswordConfig → PasswordEncoder (BCrypt)
- *       ↓
+ * ↓
  * UserServices → implements UserDetailsService
- *       ↓
+ * ↓
  * SecurityConfig → creates AuthenticationProvider (uses above 2)
- *       ↓
+ * ↓
  * AuthenticationManager → gets ALL AuthenticationProviders (auto-wiring)
- *       ↓
+ * ↓
  * AuthController → gets injected with AuthenticationManager
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │ LOGIN REQUEST: What happens step by step                               │
  * └─────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * Client → POST /auth/login {"email": "user@example.com", "password": "plain"}
- *    ↓
+ * ↓
  * 1. AuthController.login() validates request
- *    ↓
+ * ↓
  * 2. Creates UsernamePasswordAuthenticationToken(email, password)
- *    ↓
+ * ↓
  * 3. authenticationManager.authenticate(token)
- *    ↓
+ * ↓
  * 4. AuthenticationManager finds YOUR DaoAuthenticationProvider
- *    ↓
+ * ↓
  * 5. DaoAuthenticationProvider calls YOUR UserServices.loadUserByUsername(email)
- *    ↓
+ * ↓
  * 6. UserServices calls UserRepository.findByEmail() → database query
- *    ↓
+ * ↓
  * 7. Returns UserDetails with hashed password from database
- *    ↓
+ * ↓
  * 8. DaoAuthenticationProvider calls YOUR PasswordEncoder.matches(plainPassword, hashedPassword)
- *    ↓
+ * ↓
  * 9. BCrypt hashes the plain password and compares with stored hash
- *    ↓
+ * ↓
  * 10. SUCCESS → return 200 OK  |  FAILURE → BadCredentialsException → 401 Unauthorized
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │ KEY POINT: Why YOUR beans are used                                     │
  * └─────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * • Spring Boot automatically discovers your @Bean methods
  * • AuthenticationManager gets ALL AuthenticationProvider beans (yours included)
  * • Your DaoAuthenticationProvider uses YOUR UserServices and PasswordEncoder
  * • @AllArgsConstructor + dependency injection connects everything
- *
+ * <p>
  * Result: One line of code triggers your entire authentication pipeline!
  */
 @RestController
@@ -90,7 +90,7 @@ public class AuthController {
         // This one line triggers the entire flow above:
         // Token creation → Your AuthProvider → Your UserServices → Your PasswordEncoder
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         var user = userRepository.findByEmail(request.email).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);

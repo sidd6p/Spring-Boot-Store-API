@@ -45,7 +45,7 @@ public class CartController {
     @PostMapping("/{cartID}/items")
     @Operation(summary = "Add item to cart", description = "Add a product to the shopping cart.")
     public ResponseEntity<AddItemToCartResponse> addToCart(@PathVariable UUID cartID,
-                                                          @RequestBody AddItemToCartRequest addItemToCartRequest) {
+                                                           @RequestBody AddItemToCartRequest addItemToCartRequest) {
         try {
             return cartService.addToCart(cartID, addItemToCartRequest)
                     .map(ResponseEntity::ok)
@@ -60,8 +60,8 @@ public class CartController {
     @PutMapping("/{cartID}/items/{productId}")
     @Operation(summary = "Update cart item quantity", description = "Update the quantity of a specific item in the cart.")
     public ResponseEntity<CartDto> updateCartItemQuantity(@PathVariable UUID cartID,
-                                                         @PathVariable Integer productId,
-                                                         @Valid @RequestBody UpdateCartItemRequest request) {
+                                                          @PathVariable Integer productId,
+                                                          @Valid @RequestBody UpdateCartItemRequest request) {
         try {
             return cartService.updateCartItemQuantity(cartID, productId, request)
                     .map(ResponseEntity::ok)

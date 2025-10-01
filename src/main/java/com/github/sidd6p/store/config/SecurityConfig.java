@@ -1,28 +1,28 @@
 /**
  * This is a Spring Security configuration class. It's responsible for setting up the web security
  * rules for the entire application.
- *
+ * <p>
  * How it works:
  * 1. @Configuration: Tells Spring that this class contains configuration settings.
  * 2. @EnableWebSecurity: This is the master switch that enables Spring Security's web security support.
  * 3. @Bean public SecurityFilterChain securityFilterChain(...): This method defines and configures a "filter chain".
- *    A filter chain is a sequence of security checks that every incoming web request must pass through.
- *    Spring Security will automatically pick up this bean and apply it.
- *
+ * A filter chain is a sequence of security checks that every incoming web request must pass through.
+ * Spring Security will automatically pick up this bean and apply it.
+ * <p>
  * Key Configurations in this file:
  * - @Order(2): If there are multiple SecurityFilterChain beans (in different configuration files), this number
- *   determines the order of execution. A lower number means higher priority. This chain has a priority of 2,
- *   meaning it will be checked after any chains with a priority of 1. It often acts as a general-purpose
- *   or "fallback" configuration.
+ * determines the order of execution. A lower number means higher priority. This chain has a priority of 2,
+ * meaning it will be checked after any chains with a priority of 1. It often acts as a general-purpose
+ * or "fallback" configuration.
  * - sessionManagement(STATELESS): Configures the application to not maintain user sessions between requests.
- *   This is common for REST APIs where each request must contain its own authentication token (e.g., a JWT).
+ * This is common for REST APIs where each request must contain its own authentication token (e.g., a JWT).
  * - csrf(disable): Disables Cross-Site Request Forgery protection. This is also common for stateless APIs
- *   that are not vulnerable to CSRF attacks in the same way as traditional, session-based web apps.
+ * that are not vulnerable to CSRF attacks in the same way as traditional, session-based web apps.
  * - authorizeHttpRequests: Defines the access rules for different URL endpoints.
- *   - /v2/* and POST /users are marked as permitAll(), meaning they are public and do not require authentication.
- *   - anyRequest().authenticated() is a catch-all rule that ensures any other request to the application
- *     must be authenticated. If an unauthenticated user tries to access these endpoints, they will receive
- *     a 401 Unauthorized error.
+ * - /v2/* and POST /users are marked as permitAll(), meaning they are public and do not require authentication.
+ * - anyRequest().authenticated() is a catch-all rule that ensures any other request to the application
+ * must be authenticated. If an unauthenticated user tries to access these endpoints, they will receive
+ * a 401 Unauthorized error.
  */
 
 /**
@@ -79,23 +79,23 @@ public class SecurityConfig {
     @Order(2) // Higher number means lower priority.
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         // stateless session management
-       httpSecurity.sessionManagement(c->c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-               .csrf(AbstractHttpConfigurer::disable)
-               .authorizeHttpRequests(c->c
-                   .requestMatchers("/v2/*").permitAll()
-                   .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                   .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                   .anyRequest().authenticated()
-               ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-       return httpSecurity.build();
+        httpSecurity.sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(c -> c
+                        .requestMatchers("/v2/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .anyRequest().authenticated()
+                ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        return httpSecurity.build();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-       var provider = new DaoAuthenticationProvider();
-       provider.setPasswordEncoder(passwordEncoder);
-       provider.setUserDetailsService(userDetailsService);
-       return provider;
+        var provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
     }
 
     @Bean

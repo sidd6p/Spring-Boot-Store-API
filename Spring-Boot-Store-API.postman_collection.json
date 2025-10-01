@@ -1,644 +1,644 @@
 {
-	"info": {
-		"_postman_id": "fe5176f7-321e-4575-bd92-f410371113d6",
-		"name": "Spring-Boot-Store-API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "37763925"
-	},
-	"item": [
-		{
-			"name": "Home",
-			"item": [
-				{
-					"name": "Home",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Message",
-			"item": [
-				{
-					"name": "Message V1",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v1/message",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"v1",
-								"message"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Message V2",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v2/message",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"v2",
-								"message"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "User",
-			"item": [
-				{
-					"name": "Get All Users",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "name",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get User by ID",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users/2",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create User",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"type": "string"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user_name\": \"TestUser123\",\n    \"email\": \"t3@dummy.com\",\n    \"password\": \"dummypass123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update User",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"type": "string"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user_name\": \"UpdatedDummyUser\",\n    \"email\": \"updated.dummy@testmail.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users/2",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users/2",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Change Password",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"new_password\": \"newdummypass456\",\n    \"old_password\": \"dummypass123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users/109/change-password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"109",
-								"change-password"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Product",
-			"item": [
-				{
-					"name": "Get All Products",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/products",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products"
-							],
-							"query": [
-								{
-									"key": "category",
-									"value": "Electronics",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Product by ID",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/products/11",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"11"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Product",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"type": "string"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"price\": \"99.99\",\n    \"name\": \"Test Product\",\n    \"category_id\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/products",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Product",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"type": "string"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Product Name\",\n    \"category_id\": 2,\n    \"price\": 149.99\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/products/11",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"11"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Product",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"type": "string"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/products/11",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"11"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Cart",
-			"item": [
-				{
-					"name": "Create Cart",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/carts",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add Item to Cart by ID",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productId\": 14\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b/items",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"6a0c85c5-d498-4416-a1ab-2054f582040b",
-								"items"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Item in Cart by ID",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"quantity\": 100\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b/items/14",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"6a0c85c5-d498-4416-a1ab-2054f582040b",
-								"items",
-								"14"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Item in Cart by ID",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"quantity\": 100\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b/items/9",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"6a0c85c5-d498-4416-a1ab-2054f582040b",
-								"items",
-								"9"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete all Item in Cart",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"quantity\": 100\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/carts/118414cc-59a8-4eea-9c1f-d8d2501350c5/items",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"118414cc-59a8-4eea-9c1f-d8d2501350c5",
-								"items"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Cart by ID",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/carts/118414cc-59a8-4eea-9c1f-d8d2501350c5",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"118414cc-59a8-4eea-9c1f-d8d2501350c5"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Login",
-					"protocolProfileBehavior": {
-						"strictSSL": false,
-						"followRedirects": true
-					},
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"password\": \"dummypass123\",\n    \"email\": \"t3@dummy.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8080",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "fe5176f7-321e-4575-bd92-f410371113d6",
+    "name": "Spring-Boot-Store-API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37763925"
+  },
+  "item": [
+    {
+      "name": "Home",
+      "item": [
+        {
+          "name": "Home",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Message",
+      "item": [
+        {
+          "name": "Message V1",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/message",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "message"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Message V2",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v2/message",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v2",
+                "message"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get All Users",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "name",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "type": "string"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_name\": \"TestUser123\",\n    \"email\": \"t3@dummy.com\",\n    \"password\": \"dummypass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "type": "string"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_name\": \"UpdatedDummyUser\",\n    \"email\": \"updated.dummy@testmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"new_password\": \"newdummypass456\",\n    \"old_password\": \"dummypass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/109/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "109",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Get All Products",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Electronics",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/11",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "type": "string"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": \"99.99\",\n    \"name\": \"Test Product\",\n    \"category_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "type": "string"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Product Name\",\n    \"category_id\": 2,\n    \"price\": 149.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products/11",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "type": "string"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/11",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "11"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Create Cart",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Item to Cart by ID",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": 14\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "6a0c85c5-d498-4416-a1ab-2054f582040b",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Item in Cart by ID",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b/items/14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "6a0c85c5-d498-4416-a1ab-2054f582040b",
+                "items",
+                "14"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Item in Cart by ID",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/6a0c85c5-d498-4416-a1ab-2054f582040b/items/9",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "6a0c85c5-d498-4416-a1ab-2054f582040b",
+                "items",
+                "9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete all Item in Cart",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/118414cc-59a8-4eea-9c1f-d8d2501350c5/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "118414cc-59a8-4eea-9c1f-d8d2501350c5",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cart by ID",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts/118414cc-59a8-4eea-9c1f-d8d2501350c5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "118414cc-59a8-4eea-9c1f-d8d2501350c5"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "protocolProfileBehavior": {
+            "strictSSL": false,
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"password\": \"dummypass123\",\n    \"email\": \"t3@dummy.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
 }

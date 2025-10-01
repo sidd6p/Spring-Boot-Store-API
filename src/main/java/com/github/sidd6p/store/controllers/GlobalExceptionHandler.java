@@ -1,26 +1,25 @@
 package com.github.sidd6p.store.controllers;
 
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Global exception handler for the entire application.
- *
+ * <p>
  * This class automatically catches exceptions thrown by any controller and handles them
  * using the methods annotated with @ExceptionHandler. It helps avoid repeating try-catch
  * blocks in each controller and ensures consistent error responses.
@@ -31,15 +30,15 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles validation errors triggered by @Valid annotated request bodies.
-     *
+     * <p>
      * When validation fails (e.g., missing required field or invalid format),
      * Spring throws a MethodArgumentNotValidException. This method catches that exception,
      * extracts all field-specific validation errors, and returns them in a structured map.
-     *
+     * <p>
      * Example response:
      * {
-     *   "email": "must be a valid email",
-     *   "name": "must not be blank"
+     * "email": "must be a valid email",
+     * "name": "must not be blank"
      * }
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -58,16 +57,16 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles constraint violation exceptions that occur during entity validation.
-     *
+     * <p>
      * These exceptions typically occur when Bean Validation constraints on entities
      * are violated during persistence operations, such as when saving an entity to
      * the database with invalid field values.
-     *
+     * <p>
      * Example response:
      * {
-     *   "email": "Value must be in lower case"
+     * "email": "Value must be in lower case"
      * }
-     *
+     * <p>
      * Note: Even though handleGenericException catches Exception (parent of ConstraintViolationException),
      * Spring's exception resolution mechanism prioritizes built-in handlers for validation exceptions
      * before reaching our generic handler. ConstraintViolationException is handled by Spring's
@@ -81,7 +80,7 @@ public class GlobalExceptionHandler {
             String propertyPath = violation.getPropertyPath().toString();
             // Extract just the field name from the property path (removes the method name if present)
             String fieldName = propertyPath.contains(".") ?
-                propertyPath.substring(propertyPath.lastIndexOf('.') + 1) : propertyPath;
+                    propertyPath.substring(propertyPath.lastIndexOf('.') + 1) : propertyPath;
             String errorMessage = violation.getMessage();
             errors.put(fieldName, errorMessage);
             log.error("Constraint violation in field '{}': {}", fieldName, errorMessage);
@@ -93,10 +92,10 @@ public class GlobalExceptionHandler {
     /**
      * Handles method argument type mismatch exceptions, commonly occurring when
      * path variables cannot be converted to their expected types.
-     *
+     * <p>
      * This is particularly useful for UUID path parameters where invalid formats
      * (like strings that are too long or contain invalid characters) cause conversion failures.
-     *
+     * <p>
      * Example scenarios:
      * - GET /carts/invalid-uuid-format -> 400 Bad Request instead of 500 Internal Server Error
      * - GET /carts/123-456-789-too-long -> 400 Bad Request with clear message
@@ -114,7 +113,7 @@ public class GlobalExceptionHandler {
             errorMessage = String.format("Invalid UUID format for parameter '%s': '%s'", parameterName, rejectedValue);
         } else {
             errorMessage = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s",
-                rejectedValue, parameterName, requiredType != null ? requiredType.getSimpleName() : "unknown");
+                    rejectedValue, parameterName, requiredType != null ? requiredType.getSimpleName() : "unknown");
         }
 
         errors.put(parameterName, errorMessage);
@@ -125,11 +124,11 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles NoResourceFoundException when an endpoint/resource is not found.
-     *
+     * <p>
      * This occurs when:
      * - A request is made to an endpoint that doesn't exist (e.g., PUT /carts/{id}/items/{id})
      * - Spring treats it as a static resource request and fails to find it
-     *
+     * <p>
      * Returns 404 Not Found instead of 500 Internal Server Error.
      */
     @ExceptionHandler(NoResourceFoundException.class)
@@ -146,11 +145,11 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles HttpRequestMethodNotSupportedException when an unsupported HTTP method is used.
-     *
+     * <p>
      * This occurs when:
      * - A request is made using an HTTP method that is not supported by the endpoint
      * - For example, sending DELETE to an endpoint that only supports GET/POST
-     *
+     * <p>
      * Returns 405 Method Not Allowed without exposing supported methods for security reasons.
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -172,11 +171,11 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles authentication failures such as bad credentials.
-     *
+     * <p>
      * This occurs when:
      * - User provides incorrect email/password combination during login
      * - Authentication token is invalid or expired
-     *
+     * <p>
      * Returns 401 Unauthorized with a user-friendly error message.
      */
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
@@ -192,10 +191,10 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles any unhandled exceptions that are not specifically caught elsewhere.
-     *
+     * <p>
      * This acts as a fallback to ensure that even unexpected exceptions return
      * a proper HTTP 500 response instead of crashing the application.
-     *
+     * <p>
      * Note:
      * If a more specific handler (like the one above for MethodArgumentNotValidException) exists,
      * that handler will take precedence and this method will not be called.

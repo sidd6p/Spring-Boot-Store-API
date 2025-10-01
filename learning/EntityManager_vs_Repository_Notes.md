@@ -2,8 +2,8 @@
 
 The key takeaway: **Repository is a high-level abstraction built on top of EntityManager.**
 
--   **`EntityManager`**: The core, low-level JPA API. You control the lifecycle.
--   **`Repository`**: Spring Data's convenient wrapper around `EntityManager`. It handles the boilerplate.
+- **`EntityManager`**: The core, low-level JPA API. You control the lifecycle.
+- **`Repository`**: Spring Data's convenient wrapper around `EntityManager`. It handles the boilerplate.
 
 ---
 
@@ -11,9 +11,11 @@ The key takeaway: **Repository is a high-level abstraction built on top of Entit
 
 ### Method 1: Direct `EntityManager` (More Control)
 
-Use this when you need fine-grained control and immediate access to database-generated values (like IDs, timestamps, etc.).
+Use this when you need fine-grained control and immediate access to database-generated values (like IDs, timestamps,
+etc.).
 
 **Example from `createCart()`:**
+
 ```java
 @Transactional
 public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriBuilder) {
@@ -33,9 +35,10 @@ public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriBuilder) {
     return ResponseEntity.created(uri).body(cartMapper.toDto(cart));
 }
 ```
--   **`persist()`**: Makes the new `Cart` a "managed" entity.
--   **`flush()`**: Executes the `INSERT` statement.
--   **`refresh()`**: Fetches the entity state from the database.
+
+- **`persist()`**: Makes the new `Cart` a "managed" entity.
+- **`flush()`**: Executes the `INSERT` statement.
+- **`refresh()`**: Fetches the entity state from the database.
 
 ### Method 2: `Repository` (More Convenient)
 
@@ -53,6 +56,7 @@ var id = savedCart.getId();
 ```
 
 **What `cartRepository.save()` does internally:**
+
 ```java
 // This is a simplified view of Spring Data's implementation
 @Transactional
@@ -72,20 +76,23 @@ public <S extends T> S save(S entity) {
 
 This is the most critical distinction for our `createCart` use case.
 
--   **`repository.save()`**: Guarantees the ID will be populated on the returned entity. It **does not** guarantee that other database-generated fields (e.g., a `date_created` with a `DEFAULT` value) are refreshed.
+- **`repository.save()`**: Guarantees the ID will be populated on the returned entity. It **does not** guarantee that
+  other database-generated fields (e.g., a `date_created` with a `DEFAULT` value) are refreshed.
 
--   **`entityManager.persist/flush/refresh`**: The `refresh()` call explicitly updates your Java object with *all* values from the database row, including default timestamps or other triggers.
+- **`entityManager.persist/flush/refresh`**: The `refresh()` call explicitly updates your Java object with *all* values
+  from the database row, including default timestamps or other triggers.
 
 **Comparison:**
 
-| Action                                       | `repository.save(cart)`                                | `entityManager.persist/flush/refresh(cart)`            |
-| -------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------ |
-| Persists the entity?                         | ✅ Yes                                                 | ✅ Yes                                                 |
-| Populates `@Id` on the object?               | ✅ Yes                                                 | ✅ Yes                                                 |
-| Populates other DB-defaults (e.g. `NOW()`)?  | ❌ **No**                                              | ✅ **Yes**                                             |
+| Action                                      | `repository.save(cart)` | `entityManager.persist/flush/refresh(cart)` |
+|---------------------------------------------|-------------------------|---------------------------------------------|
+| Persists the entity?                        | ✅ Yes                   | ✅ Yes                                       |
+| Populates `@Id` on the object?              | ✅ Yes                   | ✅ Yes                                       |
+| Populates other DB-defaults (e.g. `NOW()`)? | ❌ **No**                | ✅ **Yes**                                   |
 
 ### When to Use Which
 
--   **Use `Repository` (e.g., `save()`)**: For most standard CRUD operations. It's cleaner and sufficient 90% of the time.
+- **Use `Repository` (e.g., `save()`)**: For most standard CRUD operations. It's cleaner and sufficient 90% of the time.
 
--   **Use `EntityManager`**: When you need to control *exactly* when SQL runs (`flush`) or when you need to get database-generated values back immediately (`refresh`).
+- **Use `EntityManager`**: When you need to control *exactly* when SQL runs (`flush`) or when you need to get
+  database-generated values back immediately (`refresh`).

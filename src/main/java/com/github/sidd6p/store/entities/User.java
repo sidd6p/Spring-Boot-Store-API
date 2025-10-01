@@ -1,8 +1,8 @@
 package com.github.sidd6p.store.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,7 +22,8 @@ import java.util.Set;
 public class User {
 
     @Id // Marks this field as the primary key of the entity
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Specifies how the primary key should be generated (auto-incremented by the database)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // Specifies how the primary key should be generated (auto-incremented by the database)
     @Column(name = "id") // JPA: maps this field to a column in the database table
     private Long id;
 
@@ -43,6 +44,18 @@ public class User {
     @Builder.Default // Lombok: initializes the addresses list to an empty ArrayList by default
     @JsonManagedReference
     private List<Address> addresses = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_tags", // Join table name
+            joinColumns = @JoinColumn(name = "user_id"), // Foreign key column for User
+            inverseJoinColumns = @JoinColumn(name = "tag_id") // Foreign key column for Tag
+    )
+    @Builder.Default
+    @JsonManagedReference
+    private Set<Tag> tags = new HashSet<>();
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @JsonManagedReference
+    private Profile profile;
 
     public void addAddress(Address address) {
         addresses.add(address);
@@ -54,34 +67,21 @@ public class User {
         address.setUser(null); // Clear the user reference in the address
     }
 
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_tags", // Join table name
-            joinColumns = @JoinColumn(name = "user_id"), // Foreign key column for User
-            inverseJoinColumns = @JoinColumn(name = "tag_id") // Foreign key column for Tag
-    )
-    @Builder.Default
-    @JsonManagedReference
-    private Set<Tag> tags = new HashSet<>();
-
-   public void addTag(Tag tag) {
+    public void addTag(Tag tag) {
         tags.add(tag);
         tag.getUsers().add(this); // Ensure the reverse relationship is maintained
     }
+
     public void removeTag(Tag tag) {
         tags.remove(tag);
         tag.getUsers().remove(this); // Ensure the reverse relationship is maintained
     }
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
-    @JsonManagedReference
-    private Profile profile;
-
     // Business logic methods - Information Expert principle
 
     /**
      * Changes the user's password if the old password matches
+     *
      * @param oldPassword the current password to verify
      * @param newPassword the new password to set
      * @return true if password was changed, false if old password doesn't match

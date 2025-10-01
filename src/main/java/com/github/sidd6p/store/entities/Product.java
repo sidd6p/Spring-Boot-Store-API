@@ -44,8 +44,9 @@ public class Product {
 
     /**
      * Updates product information from a request
-     * @param name new name (can be null to keep current)
-     * @param price new price (can be null to keep current)
+     *
+     * @param name     new name (can be null to keep current)
+     * @param price    new price (can be null to keep current)
      * @param category new category (can be null to keep current)
      */
     public void updateFromRequest(String name, java.math.BigDecimal price, Category category) {

@@ -7,13 +7,13 @@ import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
-import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -44,8 +44,8 @@ public class UserController {
     @PostMapping()
     @Operation(summary = "Create new user", description = "Register a new user in the system.")
     public ResponseEntity<Object> createUser(@RequestHeader("x-auth-token") String authToken,
-                                              @Valid @RequestBody RegisterUserRequest registerUserRequest,
-                                              UriComponentsBuilder uriBuilder) {
+                                             @Valid @RequestBody RegisterUserRequest registerUserRequest,
+                                             UriComponentsBuilder uriBuilder) {
         try {
             var userDto = userService.createUser(registerUserRequest);
             var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();

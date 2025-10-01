@@ -12,16 +12,14 @@ import java.lang.annotation.Target;
  * Custom validation annotation to ensure that a String value is in lowercase.
  *
  * @Target - Specifies where the annotation can be applied:
- *         - METHOD: Can be used on methods
- *         - FIELD: Can be used on class fields
- *         - PARAMETER: Can be used on method parameters
- *         - ANNOTATION_TYPE: Can be used on other annotations
- *
+ * - METHOD: Can be used on methods
+ * - FIELD: Can be used on class fields
+ * - PARAMETER: Can be used on method parameters
+ * - ANNOTATION_TYPE: Can be used on other annotations
  * @Retention(RetentionPolicy.RUNTIME) - Indicates this annotation will be available
- *                                      at runtime through reflection
- *
+ * at runtime through reflection
  * @Constraint - Specifies the validator class (LowerCaseValidator) that will perform
- *              the actual validation logic
+ * the actual validation logic
  */
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)

@@ -80,9 +80,9 @@ public class ProductService {
 
                     // Use Product's business logic method
                     product.updateFromRequest(
-                        registerProductRequest.getName(),
-                        registerProductRequest.getPrice(),
-                        categoryToSet
+                            registerProductRequest.getName(),
+                            registerProductRequest.getPrice(),
+                            categoryToSet
                     );
 
                     productRepository.save(product);

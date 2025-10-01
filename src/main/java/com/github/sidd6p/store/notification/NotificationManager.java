@@ -7,6 +7,7 @@ public class NotificationManager {
         this.notificationService = notificationService;
         System.out.println("NotificationManager created");
     }
+
     public void notify(String message, String recipientEmail) {
         notificationService.send(message, recipientEmail);
     }

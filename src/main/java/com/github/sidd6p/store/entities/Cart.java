@@ -3,6 +3,7 @@ package com.github.sidd6p.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -52,6 +53,7 @@ public class Cart {
 
     /**
      * Adds a new product to the cart
+     *
      * @throws IllegalStateException if product already exists in cart
      */
     public CartItem addProduct(Product product) {
@@ -70,6 +72,7 @@ public class Cart {
 
     /**
      * Updates the quantity of a product in the cart
+     *
      * @return true if the product was found and updated, false otherwise
      */
     public boolean updateProductQuantity(Integer productId, Integer newQuantity) {
@@ -83,6 +86,7 @@ public class Cart {
 
     /**
      * Removes a product from the cart
+     *
      * @param productId the ID of the product to remove
      * @return true if the product was found and removed, false otherwise
      */
