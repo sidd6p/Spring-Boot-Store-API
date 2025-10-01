@@ -2,323 +2,22 @@
 	"info": {
 		"_postman_id": "8d720720-e246-4d4b-91a5-422109af17a4",
 		"name": "Spring-Boot-Store-API",
-		"description": "Complete API documentation for the Spring Boot Store application. This collection includes endpoints for user management, product catalog, shopping cart, authentication, and admin operations.",
+		"description": "Complete API documentation for the Spring Boot Store application.\n\n**Execution Order:**\nThis collection is organized for linear execution - run folders/requests from top to bottom:\n\n**Quick Start (Main Flow):**\n1. Setup & Authentication → Create User (step 1) → Login (step 2) → Get Me (step 3)\n2. Product Management → Get All Products (step 1, auto-saves product_id)\n3. Shopping Flow → Create Cart (step 1) → Add Item to Cart (step 3) → Checkout (step 7)\n\n**All Phases:**\n1. Setup & Authentication - Create user and login\n2. Product Management - Browse and manage products (creates/updates use separate product ID)\n3. Shopping Flow - Create cart, add items, checkout (steps 5-6 optional, run BEFORE step 7)\n4. User Profile Management - Update user details (auto-updates variables)\n5. Admin Operations - Admin-only endpoints\n6. Utility Endpoints - Testing and public endpoints",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37763925"
 	},
 	"item": [
 		{
-			"name": "Home",
+			"name": "1. Setup & Authentication",
 			"item": [
 				{
-					"name": "Home",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								""
-							]
-						},
-						"description": "Returns the main home page of the application. This endpoint renders an HTML page using Thymeleaf template engine.\n\n**Response Type:** HTML\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Status Codes:**\n- 200: Home page rendered successfully\n- 401: Unauthorized (missing or invalid token)"
-					},
-					"response": []
-				}
-			],
-			"description": "Home page endpoints for the web application."
-		},
-		{
-			"name": "Message",
-			"item": [
-				{
-					"name": "Message V1",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v1/message",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"v1",
-								"message"
-							]
-						},
-						"description": "Returns a simple string message.\n\n**Response Type:** Plain text string\n\n**Response Example:**\n```\nHello, Earth!\n```\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Status Codes:**\n- 200: Message retrieved successfully\n- 401: Unauthorized (missing or invalid token)"
-					},
-					"response": []
-				},
-				{
-					"name": "Message V2",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v2/message",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"v2",
-								"message"
-							]
-						},
-						"description": "Returns a message object serialized to JSON. This is a PUBLIC endpoint.\n\n**Response Type:** JSON\n\n**Response Example:**\n```json\n{\n  \"message\": \"Hello, Earth!\"\n}\n```\n\n**Authentication:** Not required (public endpoint)\n\n**Status Codes:**\n- 200: Message retrieved successfully"
-					},
-					"response": []
-				}
-			],
-			"description": "Simple message endpoints demonstrating different response types. V1 requires authentication, V2 is public."
-		},
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Login",
+					"name": "1. Create User",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Auto-save JWT token to collection variable",
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.token) {",
-									"        pm.collectionVariables.set(\"jwt_token\", response.token);",
-									"        console.log(\"JWT token saved: \" + response.token.substring(0, 20) + \"...\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						},
-						"description": "Authenticate user with email and password. Returns JWT access token in response body and sets refresh token as HTTP-only cookie.\n\n**Request Body:**\n- `email` (string, required): User's email address (uses `{{user_email}}` if available)\n- `password` (string, required): User's password (uses `{{user_password}}` if available)\n\n**Response:**\n```json\n{\n  \"token\": \"eyJhbGciOiJIUzM4NCJ9...\"\n}\n```\n\n**Cookies Set:**\n- `refreshToken`: HTTP-only cookie for token refresh (valid for configured duration)\n\n**Status Codes:**\n- 200: Login successful\n- 400: Invalid request format\n- 401: Invalid credentials\n\n**Auto-saves:** JWT token to `jwt_token` variable\n\n**Auto-uses:** Email and password saved from Create User request"
-					},
-					"response": []
-				},
-				{
-					"name": "Me",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/me",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"me"
-							]
-						},
-						"description": "Retrieve the profile information of the currently authenticated user.\n\n**Authentication:** Required (Bearer token)\n\n**Response Example:**\n```json\n{\n  \"id\": 1,\n  \"user_name\": \"TestUser\",\n  \"email\": \"test@example.com\"\n}\n```\n\n**Status Codes:**\n- 200: User details retrieved successfully\n- 401: Unauthorized (invalid or missing token)"
-					},
-					"response": []
-				},
-				{
-					"name": "Validate Token",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/validate",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"validate"
-							]
-						},
-						"description": "Check if the provided JWT token is valid and not expired.\n\n**Authentication:** Bearer token in Authorization header\n\n**Response:**\n```json\ntrue\n```\n\n**Status Codes:**\n- 200: Token is valid (returns `true`)\n- 400: Invalid request (missing or malformed token, returns `false`)\n- 401: Token expired or invalid (returns `false`)"
-					},
-					"response": []
-				},
-				{
-					"name": "Refresh",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save refreshed JWT token to collection variable",
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.token) {",
-									"        pm.collectionVariables.set(\"jwt_token\", response.token);",
-									"        console.log(\"Refreshed JWT token saved: \" + response.token.substring(0, 20) + \"...\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/refresh",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"refresh"
-							]
-						},
-						"description": "Generate a new access token using the refresh token from cookies.\n\n**Authentication:** Refresh token cookie (automatically sent by browser)\n\n**Response:**\n```json\n{\n  \"token\": \"eyJhbGciOiJIUzM4NCJ9...\"\n}\n```\n\n**Status Codes:**\n- 200: New access token generated successfully\n- 401: Invalid or expired refresh token\n\n**Auto-saves:** JWT token to `jwt_token` variable"
-					},
-					"response": []
-				}
-			],
-			"description": "Authentication and authorization endpoints for user login, token validation, and session management using JWT tokens."
-		},
-		{
-			"name": "User Management",
-			"item": [
-				{
-					"name": "Get All Users",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							]
-						},
-						"description": "Retrieve a list of all users in the system.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Query Parameters:**\n- `sort` (optional): Field name to sort users by (e.g., 'name', 'email', 'id')\n\n**Response Example:**\n```json\n[\n  {\n    \"id\": 1,\n    \"user_name\": \"TestUser\",\n    \"email\": \"test@example.com\"\n  },\n  {\n    \"id\": 2,\n    \"user_name\": \"AnotherUser\",\n    \"email\": \"another@example.com\"\n  }\n]\n```\n\n**Status Codes:**\n- 200: Users retrieved successfully\n- 401: Unauthorized (missing or invalid token)"
-					},
-					"response": []
-				},
-				{
-					"name": "Get User by ID",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "Retrieve a specific user by their ID.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `id` (required): User ID\n\n**Response Example:**\n```json\n{\n  \"id\": 2,\n  \"user_name\": \"TestUser\",\n  \"email\": \"test@example.com\"\n}\n```\n\n**Status Codes:**\n- 200: User found and returned\n- 401: Unauthorized (missing or invalid token)\n- 404: User not found"
-					},
-					"response": []
-				},
-				{
-					"name": "Create User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save created user ID and credentials to collection variables",
+									"// Auto-save created user details to collection variables",
 									"if (pm.response.code === 201) {",
 									"    const response = pm.response.json();",
 									"    if (response.id) {",
@@ -370,31 +69,33 @@
 								"users"
 							]
 						},
-						"description": "Register a new user in the system. This is a PUBLIC endpoint (no JWT required), but requires a custom x-auth-token header.\n\n**Headers:**\n- `x-auth-token` (required): Custom authentication token (backend requires this even though endpoint is public)\n\n**Request Body:**\n- `user_name` (string, required): Username\n- `email` (string, required): User's email address (must be lowercase)\n- `password` (string, required): User's password (8-20 characters)\n\n**Response:**\n```json\n{\n  \"id\": 109,\n  \"user_name\": \"TestUser123\",\n  \"email\": \"test@dummy.com\"\n}\n```\n\n**Status Codes:**\n- 201: User created successfully (Location header contains user URI)\n- 400: Invalid request or validation error\n- 500: Missing x-auth-token header\n\n**Auto-saves:** User ID to `user_id`, username to `user_name`, email to `user_email`, password to `user_password` (for login)"
+						"description": "**STEP 1:** Create a new user account.\n\nThis is the first step in the workflow - creates a user and saves credentials for subsequent requests.\n\n**Request Body:**\n- `user_name` (string, required): Username\n- `email` (string, required): User's email (must be lowercase)\n- `password` (string, required): Password (8-20 characters)\n\n**Auto-saves:** User ID, email, password, username for use in other requests"
 					},
 					"response": []
 				},
 				{
-					"name": "Update User",
+					"name": "2. Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Auto-save JWT token to collection variable",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.token) {",
+									"        pm.collectionVariables.set(\"jwt_token\", response.token);",
+									"        console.log(\"JWT token saved: \" + response.token.substring(0, 20) + \"...\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
+						"method": "POST",
 						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"description": "Custom auth token (required by backend)",
-								"type": "string"
-							},
 							{
 								"key": "Content-Type",
 								"value": "application/json",
@@ -403,7 +104,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"user_name\": \"UpdatedDummyUser\",\n    \"email\": \"updated.dummy@testmail.com\"\n}",
+							"raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -411,21 +112,21 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}",
+							"raw": "{{base_url}}/auth/login",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"users",
-								"{{user_id}}"
+								"auth",
+								"login"
 							]
 						},
-						"description": "Update an existing user's information.\n\n**Authentication:** Required (Bearer token `{{jwt_token}}` + x-auth-token header)\n\n**Headers:**\n- `x-auth-token` (required): Custom authentication token\n- `Authorization` (required): Bearer token for JWT authentication\n\n**Path Parameters:**\n- `id` (required): User ID to update\n\n**Request Body:**\n- `user_name` (string, optional): New username\n- `email` (string, optional): New email address\n\n**Response:**\n```json\n{\n  \"id\": 2,\n  \"user_name\": \"UpdatedDummyUser\",\n  \"email\": \"updated.dummy@testmail.com\"\n}\n```\n\n**Status Codes:**\n- 200: User updated successfully\n- 401: Unauthorized (missing or invalid token)\n- 404: User not found\n- 500: Missing x-auth-token header"
+						"description": "**STEP 2:** Login with the created user credentials.\n\nAuthenticates the user and obtains a JWT token for subsequent authenticated requests.\n\n**Uses:** Email and password from Step 1\n\n**Auto-saves:** JWT token for authentication"
 					},
 					"response": []
 				},
 				{
-					"name": "Delete User",
+					"name": "3. Get Current User (Me)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -437,24 +138,24 @@
 								}
 							]
 						},
-						"method": "DELETE",
+						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}",
+							"raw": "{{base_url}}/auth/me",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"users",
-								"{{user_id}}"
+								"auth",
+								"me"
 							]
 						},
-						"description": "Remove a user from the system.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `id` (required): User ID to delete\n\n**Status Codes:**\n- 204: User deleted successfully (No content)\n- 401: Unauthorized (missing or invalid token)\n- 404: User not found"
+						"description": "**STEP 3:** Verify authentication by fetching current user details.\n\nConfirms that the JWT token is working correctly."
 					},
 					"response": []
 				},
 				{
-					"name": "Change Password",
+					"name": "4. Validate Token",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -467,65 +168,87 @@
 							]
 						},
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"new_password\": \"newdummypass456\",\n    \"old_password\": \"dummypass123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
+						"header": [],
 						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}/change-password",
+							"raw": "{{base_url}}/auth/validate",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"users",
-								"{{user_id}}",
-								"change-password"
+								"auth",
+								"validate"
 							]
 						},
-						"description": "Update a user's password.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `id` (required): User ID\n\n**Request Body:**\n- `old_password` (string, required): Current password for verification\n- `new_password` (string, required): New password (8-20 characters)\n\n**Status Codes:**\n- 200: Password changed successfully\n- 401: Unauthorized (incorrect old password or missing/invalid token)"
+						"description": "**Optional:** Validate that the JWT token is valid and not expired.\n\nReturns true/false based on token validity."
 					},
 					"response": []
-				}
-			],
-			"description": "APIs for managing users including CRUD operations and password management."
-		},
-		{
-			"name": "Product",
-			"item": [
+				},
 				{
-					"name": "Get All Products",
+					"name": "5. Refresh Token",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Auto-save first product ID if product_id is not set (for quick testing)",
+									"// Auto-save refreshed JWT token to collection variable",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.token) {",
+									"        pm.collectionVariables.set(\"jwt_token\", response.token);",
+									"        console.log(\"Refreshed JWT token saved: \" + response.token.substring(0, 20) + \"...\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "**Optional:** Refresh the access token using the refresh token cookie.\n\nUse this when the JWT token expires to get a new one without re-logging in."
+					},
+					"response": []
+				}
+			],
+			"description": "**Phase 1: Authentication Setup**\n\nExecute these endpoints in order to:\n1. Create a user account\n2. Login and obtain JWT token\n3. Verify authentication is working\n\nAll subsequent requests will use the JWT token saved here."
+		},
+		{
+			"name": "2. Product Management",
+			"item": [
+				{
+					"name": "1. Get All Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Auto-save first product ID if product_id is not set",
 									"if (pm.response.code === 200) {",
 									"    const products = pm.response.json();",
 									"    if (Array.isArray(products) && products.length > 0) {",
 									"        const currentProductId = pm.collectionVariables.get(\"product_id\");",
 									"        if (!currentProductId) {",
 									"            pm.collectionVariables.set(\"product_id\", products[0].id);",
-									"            console.log(\"Auto-saved first product ID for testing: \" + products[0].id);",
+									"            console.log(\"Auto-saved first product ID: \" + products[0].id);",
 									"        }",
 									"    }",
 									"}"
 								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -551,25 +274,55 @@
 								"products"
 							]
 						},
-						"description": "Retrieve a list of all products, optionally filtered by category.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Query Parameters:**\n- `category` (optional): Category name to filter products\n\n**Response Example:**\n```json\n[\n  {\n    \"id\": 1,\n    \"name\": \"Laptop\",\n    \"price\": 999.99,\n    \"category_id\": 1\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Mouse\",\n    \"price\": 29.99,\n    \"category_id\": 1\n  }\n]\n```\n\n**Status Codes:**\n- 200: Products retrieved successfully\n- 401: Unauthorized (missing or invalid token)\n\n**Auto-saves:** First product ID to `product_id` if not already set (for quick testing)"
+						"description": "**STEP 4:** Browse all available products.\n\nRetrieves the product catalog. Auto-saves the first product ID for adding to cart.\n\n**Query Parameters:**\n- `category` (optional): Filter by category name\n\n**Auto-saves:** First product ID if not already set"
 					},
 					"response": []
 				},
 				{
-					"name": "Create Product",
+					"name": "2. Get Product by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "**Optional:** View details of a specific product.\n\nUses the product ID saved from the previous request."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Create Product",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Auto-save created product details to collection variables",
+									"// Save created product to a separate variable to avoid overwriting existing product_id",
 									"if (pm.response.code === 201) {",
 									"    const response = pm.response.json();",
 									"    if (response.id) {",
-									"        pm.collectionVariables.set(\"product_id\", response.id);",
-									"        console.log(\"Product ID saved: \" + response.id);",
+									"        // Save to created_product_id instead of product_id",
+									"        pm.collectionVariables.set(\"created_product_id\", response.id);",
+									"        console.log(\"Created product ID saved to 'created_product_id': \" + response.id);",
+									"        console.log(\"NOTE: Main 'product_id' preserved for cart operations\");",
 									"    }",
-									"    // Save product details for reference",
 									"    const requestBody = JSON.parse(pm.request.body.raw);",
 									"    pm.collectionVariables.set(\"product_name\", requestBody.name);",
 									"    pm.collectionVariables.set(\"product_price\", requestBody.price);",
@@ -617,41 +370,12 @@
 								"products"
 							]
 						},
-						"description": "Register a new product in the system.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Request Body:**\n- `name` (string, required): Product name\n- `price` (number, required): Product price (decimal value)\n- `category_id` (integer, required): Category ID the product belongs to\n\n**Response:**\n```json\n{\n  \"id\": 11,\n  \"name\": \"Test Product\",\n  \"price\": 99.99,\n  \"category_id\": 1\n}\n```\n\n**Status Codes:**\n- 201: Product created successfully (Location header contains product URI)\n- 400: Invalid request or validation error\n- 401: Unauthorized (missing or invalid token)\n\n**Auto-saves:** Product ID to `product_id`, name to `product_name`, price to `product_price`"
+						"description": "**Optional:** Create a new product.\n\nUse this if you want to create a custom product for testing.\n\n**Auto-saves:** Product details to 'created_product_id' (separate from main 'product_id' used for cart)\n\n**Note:** This does NOT overwrite the 'product_id' from 'Get All Products' to ensure cart operations work correctly."
 					},
 					"response": []
 				},
 				{
-					"name": "Get Product by ID",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/products/{{product_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"{{product_id}}"
-							]
-						},
-						"description": "Retrieve a specific product by its ID.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `id` (required): Product ID\n\n**Response Example:**\n```json\n{\n  \"id\": 11,\n  \"name\": \"Test Product\",\n  \"price\": 99.99,\n  \"category_id\": 1\n}\n```\n\n**Status Codes:**\n- 200: Product found and returned\n- 401: Unauthorized (missing or invalid token)\n- 404: Product not found"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Product",
+					"name": "4. Update Product",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -681,21 +405,21 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/products/{{product_id}}",
+							"raw": "{{base_url}}/products/{{created_product_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"products",
-								"{{product_id}}"
+								"{{created_product_id}}"
 							]
 						},
-						"description": "Update an existing product's information.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `id` (required): Product ID to update\n\n**Request Body:**\n- `name` (string, optional): New product name\n- `price` (number, optional): New product price\n- `category_id` (integer, optional): New category ID\n\n**Response:**\n```json\n{\n  \"id\": 11,\n  \"name\": \"Updated Product Name\",\n  \"price\": 149.99,\n  \"category_id\": 2\n}\n```\n\n**Status Codes:**\n- 200: Product updated successfully\n- 400: Invalid request\n- 401: Unauthorized (missing or invalid token)\n- 404: Product not found"
+						"description": "**Optional:** Update the created product.\n\nModifies the product created in step 3. Uses 'created_product_id' variable."
 					},
 					"response": []
 				},
 				{
-					"name": "Delete Product",
+					"name": "5. Delete Product",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -710,27 +434,27 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/products/{{product_id}}",
+							"raw": "{{base_url}}/products/{{created_product_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"products",
-								"{{product_id}}"
+								"{{created_product_id}}"
 							]
 						},
-						"description": "Remove a product from the system.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `id` (required): Product ID to delete\n\n**Status Codes:**\n- 204: Product deleted successfully (No content)\n- 401: Unauthorized (missing or invalid token)\n- 404: Product not found"
+						"description": "**Optional:** Delete the created product.\n\nDeletes the product created in step 3. Uses 'created_product_id' to avoid affecting the main product used for cart operations.\n\n**Safe to run:** This won't affect the product_id used for adding items to cart."
 					},
 					"response": []
 				}
 			],
-			"description": "Product management APIs for CRUD operations on products and filtering by category."
+			"description": "**Phase 2: Product Catalog**\n\nBrowse and manage products:\n1. View all products (auto-saves product ID)\n2. View specific product details\n3. (Optional) Create, update, or delete products"
 		},
 		{
-			"name": "Cart Management",
+			"name": "3. Shopping Flow",
 			"item": [
 				{
-					"name": "Create Cart",
+					"name": "1. Create Cart",
 					"event": [
 						{
 							"listen": "test",
@@ -771,12 +495,12 @@
 								"carts"
 							]
 						},
-						"description": "Create a new empty shopping cart.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Response Example:**\n```json\n{\n  \"id\": \"6a0c85c5-d498-4416-a1ab-2054f582040b\",\n  \"items\": [],\n  \"total\": 0.00\n}\n```\n\n**Status Codes:**\n- 201: Cart created successfully (Location header contains cart URI)\n- 401: Unauthorized (missing or invalid token)\n\n**Auto-saves:** Cart ID to `cart_id` variable"
+						"description": "**STEP 5:** Create a new shopping cart.\n\nInitiates the shopping process by creating an empty cart.\n\n**Auto-saves:** Cart ID for adding items"
 					},
 					"response": []
 				},
 				{
-					"name": "Get Cart by ID",
+					"name": "2. Get Cart by ID",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -800,12 +524,12 @@
 								"{{cart_id}}"
 							]
 						},
-						"description": "Retrieve a shopping cart by its ID.\n\n**Path Parameters:**\n- `cartID` (required): Cart UUID\n\n**Response Example:**\n```json\n{\n  \"id\": \"118414cc-59a8-4eea-9c1f-d8d2501350c5\",\n  \"items\": [\n    {\n      \"productId\": 14,\n      \"quantity\": 2,\n      \"price\": 99.99,\n      \"subtotal\": 199.98\n    }\n  ],\n  \"total\": 199.98\n}\n```\n\n**Status Codes:**\n- 200: Cart retrieved successfully\n- 404: Cart not found"
+						"description": "**Optional:** View current cart contents.\n\nVerify that the cart was created successfully."
 					},
 					"response": []
 				},
 				{
-					"name": "Add Item to Cart",
+					"name": "3. Add Item to Cart",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -845,12 +569,12 @@
 								"items"
 							]
 						},
-						"description": "Add a product to the shopping cart. If the product already exists in the cart, the quantity will be increased.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `cartID` (required): Cart UUID\n\n**Request Body:**\n- `productId` (integer, required): ID of the product to add (uses `{{product_id}}`)\n\n**Response Example:**\n```json\n{\n  \"productId\": 14,\n  \"quantity\": 1,\n  \"price\": 99.99,\n  \"message\": \"Item added successfully\"\n}\n```\n\n**Status Codes:**\n- 200: Item added to cart successfully\n- 400: Invalid request (product doesn't exist)\n- 401: Unauthorized (missing or invalid token)\n- 404: Cart not found\n- 409: Conflict (item already in cart)"
+						"description": "**STEP 6:** Add a product to the cart.\n\nAdds the product (from Step 4) to the cart (from Step 5)."
 					},
 					"response": []
 				},
 				{
-					"name": "Update Cart Item Quantity",
+					"name": "4. Update Cart Item Quantity",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -891,12 +615,12 @@
 								"{{product_id}}"
 							]
 						},
-						"description": "Update the quantity of a specific item in the cart.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `cartID` (required): Cart UUID\n- `productId` (required): Product ID\n\n**Request Body:**\n- `quantity` (integer, required): New quantity (must be at least 1)\n\n**Response Example:**\n```json\n{\n  \"id\": \"6a0c85c5-d498-4416-a1ab-2054f582040b\",\n  \"items\": [\n    {\n      \"productId\": 14,\n      \"quantity\": 5,\n      \"price\": 99.99,\n      \"subtotal\": 499.95\n    }\n  ],\n  \"total\": 499.95\n}\n```\n\n**Status Codes:**\n- 200: Cart item quantity updated successfully\n- 401: Unauthorized (missing or invalid token)\n- 404: Cart or item not found"
+						"description": "**Optional:** Update the quantity of an item in the cart.\n\nChange the quantity from 1 to a higher number."
 					},
 					"response": []
 				},
 				{
-					"name": "Remove Item from Cart",
+					"name": "5. Remove Item from Cart",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -922,12 +646,12 @@
 								"{{product_id}}"
 							]
 						},
-						"description": "Remove a specific item from the shopping cart.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `cartID` (required): Cart UUID\n- `productId` (required): Product ID to remove\n\n**Status Codes:**\n- 204: Item removed successfully (No content)\n- 401: Unauthorized (missing or invalid token)\n- 404: Cart or item not found"
+						"description": "**Optional:** Remove a specific item from the cart.\n\nNOTE: Use this to test removing items. Execute before checkout if needed."
 					},
 					"response": []
 				},
 				{
-					"name": "Clear Cart",
+					"name": "6. Clear Cart",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -952,53 +676,12 @@
 								"items"
 							]
 						},
-						"description": "Remove all items from the shopping cart.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Path Parameters:**\n- `cartID` (required): Cart UUID\n\n**Status Codes:**\n- 204: All items removed successfully (No content)\n- 401: Unauthorized (missing or invalid token)\n- 404: Cart not found"
+						"description": "**Optional:** Remove all items from the cart.\n\nNOTE: Use this to empty the cart. Execute before checkout if you want to test clearing."
 					},
 					"response": []
-				}
-			],
-			"description": "APIs for managing shopping carts including adding, updating, and removing items."
-		},
-		{
-			"name": "Admin",
-			"item": [
+				},
 				{
-					"name": "Hello",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/admin/hello",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"admin",
-								"hello"
-							]
-						},
-						"description": "Test endpoint for admin access verification. Only accessible to users with ADMIN role.\n\n**Authentication:** Required (Admin role, uses `{{jwt_token}}`)\n\n**Response:**\n```\nAdmin endpoint - access restricted to ADMIN role\n```\n\n**Status Codes:**\n- 200: Access granted (user has ADMIN role)\n- 403: Forbidden (user doesn't have ADMIN role)"
-					},
-					"response": []
-				}
-			],
-			"description": "Admin-only endpoints with restricted access. These endpoints require ADMIN role."
-		},
-		{
-			"name": "Checkout",
-			"item": [
-				{
-					"name": "Checkout",
+					"name": "7. Checkout",
 					"event": [
 						{
 							"listen": "test",
@@ -1048,12 +731,362 @@
 								"checkout"
 							]
 						},
-						"description": "Process checkout for a shopping cart.\n\n**Authentication:** Required (Bearer token, uses `{{jwt_token}}`)\n\n**Request Body:**\n- `cartId` (string, required): UUID of the cart to checkout (uses `{{cart_id}}`)\n\n**Response Example:**\n```json\n{\n  \"orderId\": 123\n}\n```\n\n**Status Codes:**\n- 200: Checkout successful\n- 400: Invalid cart or empty cart\n- 401: Unauthorized\n\n**Auto-saves:** Order ID to `order_id` variable"
+						"description": "**STEP 7:** Complete the purchase.\n\nProcesses the cart and creates an order. The cart will be cleared after checkout.\n\n**Auto-saves:** Order ID\n\n**Important:** \n- Execute this AFTER adding items (step 3)\n- Skip steps 5-6 (Remove/Clear) for successful checkout\n- If you ran steps 5 or 6, re-add items before checkout"
 					},
 					"response": []
 				}
 			],
-			"description": "Checkout endpoint for processing orders from shopping carts."
+			"description": "**Phase 3: Shopping & Checkout**\n\nComplete shopping workflow:\n1. Create Cart - Initialize empty cart\n2. Get Cart by ID - View cart (optional)\n3. Add Item to Cart - Add product to cart\n4. Update Cart Item Quantity - Change quantities (optional)\n5. Remove Item from Cart - Remove specific item (optional, BEFORE checkout)\n6. Clear Cart - Empty entire cart (optional, BEFORE checkout)\n7. Checkout - Complete purchase (clears cart)\n\n**For successful checkout:** Run steps 1→3→7 (skip 4-6)\n**To test remove/clear:** Run steps 1→3→5 or 6→(re-add items)→7"
+		},
+		{
+			"name": "4. User Profile Management",
+			"item": [
+				{
+					"name": "1. Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users?sort=id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "id"
+								}
+							]
+						},
+						"description": "**Optional:** View all users in the system.\n\n**Query Parameters:**\n- `sort`: Field to sort by (id, name, email)"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "**Optional:** View specific user details.\n\nRetrieves the user created in Step 1."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Update collection variables if user details changed",
+									"if (pm.response.code === 200) {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    if (requestBody.email) {",
+									"        pm.collectionVariables.set(\"user_email\", requestBody.email);",
+									"        console.log(\"User email updated to: \" + requestBody.email);",
+									"    }",
+									"    if (requestBody.user_name) {",
+									"        pm.collectionVariables.set(\"user_name\", requestBody.user_name);",
+									"        console.log(\"User name updated to: \" + requestBody.user_name);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "asfgfdv",
+								"description": "Custom auth token (required by backend)",
+								"type": "string"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_name\": \"UpdatedDummyUser\",\n    \"email\": \"updated.dummy@testmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "**Optional:** Update user profile information.\n\nModify the user's name or email address.\n\n**Auto-updates:** Collection variables (user_email, user_name) are updated with new values."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Change Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Update password variable if password changed successfully",
+									"if (pm.response.code === 200) {",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    if (requestBody.new_password) {",
+									"        pm.collectionVariables.set(\"user_password\", requestBody.new_password);",
+									"        console.log(\"User password updated in collection variables\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"new_password\": \"newdummypass456\",\n    \"old_password\": \"{{user_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}",
+								"change-password"
+							]
+						},
+						"description": "**Optional:** Change user password.\n\nRequires the old password for verification.\n\n**Auto-updates:** Collection variable 'user_password' is updated with the new password."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "**Optional:** Delete the user account.\n\nWARNING: Run this last if testing user management, as it will delete the user and invalidate the JWT token."
+					},
+					"response": []
+				}
+			],
+			"description": "**Phase 4: User Profile Management**\n\nManage user accounts:\n1. View all users\n2. View specific user\n3. Update profile information\n4. Change password\n5. Delete user account (cleanup)"
+		},
+		{
+			"name": "5. Admin Operations",
+			"item": [
+				{
+					"name": "1. Admin Hello",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/hello",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"hello"
+							]
+						},
+						"description": "**Admin Only:** Test endpoint for admin access verification.\n\nNOTE: Requires ADMIN role. Regular users will receive 403 Forbidden.\n\n**Status Codes:**\n- 200: Access granted (user has ADMIN role)\n- 403: Forbidden (user doesn't have ADMIN role)"
+					},
+					"response": []
+				}
+			],
+			"description": "**Phase 5: Admin Endpoints**\n\nAdmin-only operations requiring ADMIN role.\n\nNote: The default user created in Step 1 has USER role and will receive 403 Forbidden for these endpoints."
+		},
+		{
+			"name": "6. Utility Endpoints",
+			"item": [
+				{
+					"name": "1. Message V2 (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v2/message",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v2",
+								"message"
+							]
+						},
+						"description": "**Public endpoint:** Returns a message object as JSON.\n\nNo authentication required - useful for testing API connectivity."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Message V1 (Authenticated)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/message",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"message"
+							]
+						},
+						"description": "**Authenticated endpoint:** Returns a plain text message.\n\nRequires JWT token - demonstrates authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Home Page",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "**HTML endpoint:** Returns the home page.\n\nRenders an HTML page using Thymeleaf template engine."
+					},
+					"response": []
+				}
+			],
+			"description": "**Phase 6: Utility & Testing Endpoints**\n\nMiscellaneous endpoints for testing:\n- Public message endpoint (no auth)\n- Authenticated message endpoint\n- Home page (HTML response)\n\nUseful for testing API connectivity and authentication."
 		}
 	],
 	"variable": [
@@ -1089,6 +1122,11 @@
 		},
 		{
 			"key": "product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "created_product_id",
 			"value": "",
 			"type": "string"
 		},
