@@ -1,5 +1,6 @@
 package com.github.sidd6p.store.filters;
 
+import com.github.sidd6p.store.services.Jwt;
 import com.github.sidd6p.store.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,10 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         var token = authHeader.replace("Bearer ", "");
-        if (jwtService.validateToken(token)) {
-            var role = jwtService.getRoleFromToken(token);
-            var userID = jwtService.getUserIdFromToken(token);
-            var authentication = new UsernamePasswordAuthenticationToken(userID, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+        Jwt jwt = jwtService.parseToken(token);
+        if (jwt != null && jwt.isValid()) {
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    jwt.getUserId(),
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + jwt.getRole()))
+            );
             // Set the authentication in the SecurityContext
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);

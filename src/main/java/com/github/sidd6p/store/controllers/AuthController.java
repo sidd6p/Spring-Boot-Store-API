@@ -6,6 +6,7 @@ import com.github.sidd6p.store.dtos.LoginRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
+import com.github.sidd6p.store.services.Jwt;
 import com.github.sidd6p.store.services.JwtService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -95,14 +96,14 @@ public class AuthController {
         var user = userRepository.findByEmail(request.email).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
-        var cookie = new Cookie("refreshToken", refreshToken);
+        var cookie = new Cookie("refreshToken", refreshToken.toString());
         cookie.setHttpOnly(true);
         cookie.setPath("/auth/refresh");
         cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());
         cookie.setSecure(false); // in production this should be true, ensure cookies are sent over HTTPS
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
 
@@ -122,8 +123,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body(false);
         }
 
-        boolean isValid = jwtService.validateToken(token);
-        if (isValid) {
+        Jwt jwt = jwtService.parseToken(token);
+        if (jwt != null && jwt.isValid()) {
             return ResponseEntity.ok(true);
         } else {
             return ResponseEntity.status(401).body(false);
@@ -135,16 +136,15 @@ public class AuthController {
         if (refreshToken == null || refreshToken.trim().isEmpty()) {
             return ResponseEntity.status(401).build();
         }
-
-        if (!jwtService.validateToken(refreshToken)) {
+        Jwt jwt = jwtService.parseToken(refreshToken);
+        if (jwt == null || !jwt.isValid()) {
             return ResponseEntity.status(401).build();
         }
 
-        Long userId = jwtService.getUserIdFromToken(refreshToken);
-        var user = userRepository.findById(userId).orElseThrow();
+        var user = userRepository.findById(jwt.getUserId()).orElseThrow();
         var newAccessToken = jwtService.generateAccessToken(user);
 
-        return ResponseEntity.ok(new JwtResponse(newAccessToken));
+        return ResponseEntity.ok(new JwtResponse(newAccessToken.toString()));
     }
 
 

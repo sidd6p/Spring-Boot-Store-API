@@ -1,7 +1,6 @@
 package com.github.sidd6p.store.services;
 
 import com.github.sidd6p.store.config.JwtConfig;
-import com.github.sidd6p.store.entities.Role;
 import com.github.sidd6p.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -15,22 +14,33 @@ import java.util.Date;
 public class JwtService {
     private final JwtConfig jwtConfig;
 
-    public String generateAccessToken(User user) {
+    public Jwt generateAccessToken(User user) {
         return getToken(user, jwtConfig.getAccessTokenExpiration() * 1000L); // Convert seconds to milliseconds
     }
 
-    public String generateRefreshToken(User user) {
+    public Jwt generateRefreshToken(User user) {
         return getToken(user, jwtConfig.getRefreshTokenExpiration() * 1000L); // Convert seconds to milliseconds
     }
 
-    private String getToken(User user, long expirationTimeInMillis) {
-        return Jwts.builder().subject(user.getId().toString())
-                .claim("email", user.getEmail())
-                .claim("name", user.getName())
-                .claim("role", user.getRole().name())
-                .issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expirationTimeInMillis))
-                .signWith(jwtConfig.getSecretKey())
-                .compact();
+    private Jwt getToken(User user, long expirationTimeInMillis) {
+        var claims = Jwts.claims().subject(user.getId().toString())
+                .add("email", user.getEmail())
+                .add("name", user.getName())
+                .add("role", user.getRole().name())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTimeInMillis))
+                .build();
+        return new Jwt(claims, jwtConfig.getSecretKey());
+    }
+
+    public Jwt parseToken(String token) {
+        try {
+            var claims = getClaims(token);
+            return new Jwt(claims, jwtConfig.getSecretKey());
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
     private Claims getClaims(String token) {
@@ -39,23 +49,5 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            getClaims(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public Long getUserIdFromToken(String token) {
-        return Long.valueOf(getClaims(token).getSubject());
-    }
-
-    public Role getRoleFromToken(String token) {
-        String role = getClaims(token).get("role", String.class);
-        return Role.valueOf(role);
     }
 }
