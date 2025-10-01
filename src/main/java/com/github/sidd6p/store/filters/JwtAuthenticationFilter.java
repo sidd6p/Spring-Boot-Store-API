@@ -27,6 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var authHeader = request.getHeader("Authorization");
+
+        // If no Authorization header, continue filter chain
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -34,6 +36,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         var token = authHeader.replace("Bearer ", "");
         Jwt jwt = jwtService.parseToken(token);
+
+        // Only set authentication if JWT is valid
+        // If invalid, continue filter chain and let Spring Security handle authorization
         if (jwt != null && jwt.isValid()) {
             var authentication = new UsernamePasswordAuthenticationToken(
                     jwt.getUserId(),
@@ -43,11 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Set the authentication in the SecurityContext
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            filterChain.doFilter(request, response);
-        } else {
-            // Token is invalid, return 401 Unauthorized
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid JWT token");
         }
+
+        // Always continue the filter chain - let Spring Security decide if authentication is required
+        filterChain.doFilter(request, response);
     }
 }

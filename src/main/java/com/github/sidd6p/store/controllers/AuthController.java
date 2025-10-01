@@ -8,6 +8,8 @@ import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
 import com.github.sidd6p.store.services.Jwt;
 import com.github.sidd6p.store.services.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -77,6 +79,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Authentication and authorization endpoints")
 public class AuthController {
 
     // This contains YOUR AuthenticationProvider from SecurityConfig!
@@ -87,11 +90,12 @@ public class AuthController {
     private final JwtConfig jwtConfig;
 
     @PostMapping("/login")
+    @Operation(summary = "User login", description = "Authenticate user with email and password, returns JWT access token and sets refresh token cookie")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         // This one line triggers the entire flow above:
         // Token creation → Your AuthProvider → Your UserServices → Your PasswordEncoder
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.email, request.password)
         );
         var user = userRepository.findByEmail(request.email).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);
@@ -108,6 +112,7 @@ public class AuthController {
 
 
     @PostMapping("/validate")
+    @Operation(summary = "Validate JWT token", description = "Check if the provided JWT token is valid and not expired")
     public ResponseEntity<Boolean> validateToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || authHeader.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(false);
@@ -132,6 +137,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh access token", description = "Generate a new access token using the refresh token from cookies")
     public ResponseEntity<JwtResponse> refreshToken(@CookieValue(value = "refreshToken") String refreshToken) {
         if (refreshToken == null || refreshToken.trim().isEmpty()) {
             return ResponseEntity.status(401).build();
@@ -149,6 +155,7 @@ public class AuthController {
 
 
     @GetMapping("/me")
+    @Operation(summary = "Get current user", description = "Retrieve the profile information of the currently authenticated user")
     public ResponseEntity<UserDto> getCurrentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
