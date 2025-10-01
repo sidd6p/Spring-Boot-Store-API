@@ -1,9 +1,6 @@
 package com.github.sidd6p.store;
 
-import com.github.sidd6p.store.entities.Address;
-import com.github.sidd6p.store.entities.Profile;
-import com.github.sidd6p.store.entities.Tag;
-import com.github.sidd6p.store.entities.User;
+import com.github.sidd6p.store.entities.*;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import com.github.sidd6p.store.repositories.UserRepository;
@@ -77,6 +74,7 @@ public class StoreApplication {
                 .name("Siddharth Purwar")
                 .email("siddpurwar@gmail.com")
                 .password("Siddharth")
+                .role(Role.USER)
                 .build();
         userRepository.save(user1);
         var id1 = user1.getId();
@@ -107,7 +105,7 @@ public class StoreApplication {
         user1.setEmail("siddpurwar@gmail.com");
         System.out.println("User1: " + user1);
 
-        var user2 = new User(null, null, "siddpurwar6@gmail.com", null, new ArrayList<>(), new HashSet<>(), null);
+        var user2 = new User(null, null, "siddpurwar6@gmail.com", null, null, new ArrayList<>(), new HashSet<>(), null);
         System.out.println("User2: " + user2);
 
         // We are not using the 'new' keyword here because Lombok's @Builder generates a builder() method.

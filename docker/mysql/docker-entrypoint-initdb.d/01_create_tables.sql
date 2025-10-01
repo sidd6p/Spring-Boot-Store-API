@@ -4,6 +4,7 @@ CREATE TABLE
                 `name` varchar(255) NOT NULL,
                 `email` varchar(255) NOT NULL,
                 `password` varchar(255) NOT NULL,
+                `role` varchar(225) NOT NULL DEFAULT 'USER',
                 PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 

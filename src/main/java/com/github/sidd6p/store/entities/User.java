@@ -36,6 +36,11 @@ public class User {
     @Column(name = "password", nullable = true)
     private String password;
 
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Role role = Role.USER;
+
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, fetch = FetchType.LAZY)
     // CascadeType.PERSIST: When saving a User, also save its Addresses.
     // CascadeType.REMOVE: When deleting a User, also delete its Addresses.

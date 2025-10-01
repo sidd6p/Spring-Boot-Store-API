@@ -1,10 +1,10 @@
 -- Insert dummy data for users table
-INSERT INTO `users` (`name`, `email`, `password`) VALUES
-('John Doe', 'john.doe@email.com', 'password123'),
-('Jane Smith', 'jane.smith@email.com', 'securepass456'),
-('Mike Johnson', 'mike.johnson@email.com', 'mypassword789'),
-('Sarah Wilson', 'sarah.wilson@email.com', 'pass123word'),
-('David Brown', 'david.brown@email.com', 'brownpass321');
+INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
+('John Doe', 'john.doe@email.com', 'password123', 'USER'),
+('Jane Smith', 'jane.smith@email.com', 'securepass456', 'USER'),
+('Mike Johnson', 'mike.johnson@email.com', 'mypassword789', 'USER'),
+('Sarah Wilson', 'sarah.wilson@email.com', 'pass123word', 'USER'),
+('David Brown', 'david.brown@email.com', 'brownpass321', 'USER');
 
 -- Insert dummy data for addresses table
 INSERT INTO `addresses` (`city`, `zip`, `street`, `user_id`) VALUES

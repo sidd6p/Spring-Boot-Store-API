@@ -5,6 +5,7 @@ import com.github.sidd6p.store.dtos.RegisterUserRequest;
 import com.github.sidd6p.store.dtos.UpdateUserRequest;
 import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.entities.Address;
+import com.github.sidd6p.store.entities.Role;
 import com.github.sidd6p.store.entities.User;
 import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.AddressRepository;
@@ -63,6 +64,7 @@ public class UserService implements UserDetailsService {
 
         var user = userMapper.toEntity(registerUserRequest);
         user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
+        user.setRole(Role.USER);
         userRepository.save(user);
 
         return userMapper.toDto(user);
@@ -113,6 +115,7 @@ public class UserService implements UserDetailsService {
                 .name("Siddharth Purwar")
                 .email("siddpurwar@gmail.com")
                 .password("Siddharth")
+                .role(Role.USER)
                 .build();
 
         if (entityManager.contains(user1)) {
@@ -143,6 +146,7 @@ public class UserService implements UserDetailsService {
                 .name("Siddharth Purwar")
                 .email("siddpurwar@gmail.com")
                 .password("Siddharth")
+                .role(Role.USER)
                 .build();
         var address = Address.builder()
                 .city("Delhi")

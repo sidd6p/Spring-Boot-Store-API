@@ -17,16 +17,17 @@ etc.).
 **Example from `createCart()`:**
 
 ```java
+
 @Transactional
 public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriBuilder) {
     var cart = new Cart();
 
     // 1. Tell EntityManager to manage the entity
     entityManager.persist(cart);
-    
+
     // 2. Force the INSERT SQL to run immediately
     entityManager.flush();
-    
+
     // 3. Update the 'cart' object with values from the database (e.g., generated UUID, timestamps)
     entityManager.refresh(cart);
 
