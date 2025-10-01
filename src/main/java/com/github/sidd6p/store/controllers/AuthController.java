@@ -6,7 +6,8 @@ import com.github.sidd6p.store.dtos.UserDto;
 import com.github.sidd6p.store.mappers.UserMapper;
 import com.github.sidd6p.store.repositories.UserRepository;
 import com.github.sidd6p.store.services.JwtService;
-import com.github.sidd6p.store.services.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -83,16 +84,23 @@ public class AuthController {
     private final UserMapper userMapper;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         // This one line triggers the entire flow above:
         // Token creation → Your AuthProvider → Your UserServices → Your PasswordEncoder
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         var user = userRepository.findByEmail(request.email).orElseThrow();
-        var token = jwtService.generateToken(user);
+        var accessToken = jwtService.generateAccessToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        var cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/auth/refresh");
+        cookie.setMaxAge(864000);
+        cookie.setSecure(false); // in production this should be true, ensure cookies are sent over HTTPS
+        response.addCookie(cookie);
 
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(accessToken));
     }
 
 
