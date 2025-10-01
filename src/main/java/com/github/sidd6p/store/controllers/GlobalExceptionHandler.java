@@ -1,10 +1,13 @@
 package com.github.sidd6p.store.controllers;
 
+import com.github.sidd6p.store.dtos.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -15,8 +18,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Global exception handler for the entire application.
@@ -34,16 +38,11 @@ public class GlobalExceptionHandler {
      * <p>
      * When validation fails (e.g., missing required field or invalid format),
      * Spring throws a MethodArgumentNotValidException. This method catches that exception,
-     * extracts all field-specific validation errors, and returns them in a structured map.
-     * <p>
-     * Example response:
-     * {
-     * "email": "must be a valid email",
-     * "name": "must not be blank"
-     * }
+     * extracts all field-specific validation errors, and returns them in a structured format.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
+                                                                       HttpServletRequest request) {
         var errors = new HashMap<String, String>();
 
         exception.getBindingResult().getAllErrors().forEach((error) -> {
@@ -53,7 +52,16 @@ public class GlobalExceptionHandler {
             log.error("Validation error in field '{}': {}", fieldName, errorMessage);
         });
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Validation failed")
+                .details(errors)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     /**
@@ -62,19 +70,10 @@ public class GlobalExceptionHandler {
      * These exceptions typically occur when Bean Validation constraints on entities
      * are violated during persistence operations, such as when saving an entity to
      * the database with invalid field values.
-     * <p>
-     * Example response:
-     * {
-     * "email": "Value must be in lower case"
-     * }
-     * <p>
-     * Note: Even though handleGenericException catches Exception (parent of ConstraintViolationException),
-     * Spring's exception resolution mechanism prioritizes built-in handlers for validation exceptions
-     * before reaching our generic handler. ConstraintViolationException is handled by Spring's
-     * default exception resolvers first, which is why we need this specific handler.
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException exception) {
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException exception,
+                                                                    HttpServletRequest request) {
         var errors = new HashMap<String, String>();
 
         exception.getConstraintViolations().forEach(violation -> {
@@ -87,7 +86,16 @@ public class GlobalExceptionHandler {
             log.error("Constraint violation in field '{}': {}", fieldName, errorMessage);
         });
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Constraint violation")
+                .details(errors)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     /**
@@ -102,9 +110,8 @@ public class GlobalExceptionHandler {
      * - GET /carts/123-456-789-too-long -> 400 Bad Request with clear message
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
-        var errors = new HashMap<String, String>();
-
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception,
+                                                                           HttpServletRequest request) {
         String parameterName = exception.getName();
         Class<?> requiredType = exception.getRequiredType();
         Object rejectedValue = exception.getValue();
@@ -117,10 +124,17 @@ public class GlobalExceptionHandler {
                     rejectedValue, parameterName, requiredType != null ? requiredType.getSimpleName() : "unknown");
         }
 
-        errors.put(parameterName, errorMessage);
         log.warn("Method argument type mismatch: {}", errorMessage);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     /**
@@ -136,9 +150,8 @@ public class GlobalExceptionHandler {
      * - POST /checkout with malformed JSON -> 400 Bad Request with clear message
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
-        var errors = new HashMap<String, String>();
-
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException exception,
+                                                                       HttpServletRequest request) {
         String errorMessage = "Invalid request body";
 
         // Extract more specific error message if available
@@ -156,10 +169,17 @@ public class GlobalExceptionHandler {
             }
         }
 
-        errors.put("error", errorMessage);
         log.warn("HTTP message not readable: {}", exception.getMessage());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     /**
@@ -172,15 +192,21 @@ public class GlobalExceptionHandler {
      * Returns 404 Not Found instead of 500 Internal Server Error.
      */
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException exception) {
-        var errors = new HashMap<String, String>();
-
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException exception,
+                                                                HttpServletRequest request) {
         String resourcePath = exception.getResourcePath();
         String errorMessage = String.format("Endpoint not found: %s", resourcePath);
-        errors.put("error", errorMessage);
         log.warn("Resource not found: {}", resourcePath);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     /**
@@ -193,20 +219,26 @@ public class GlobalExceptionHandler {
      * Returns 405 Method Not Allowed without exposing supported methods for security reasons.
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Map<String, String>> handleMethodNotSupported(HttpRequestMethodNotSupportedException exception) {
-        var errors = new HashMap<String, String>();
-
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException exception,
+                                                                   HttpServletRequest request) {
         String method = exception.getMethod();
         String[] supportedMethods = exception.getSupportedMethods();
 
         String errorMessage = String.format("HTTP method '%s' is not supported for this endpoint", method);
-        errors.put("error", errorMessage);
 
         // Log supported methods for debugging but don't expose them in the response for security
         log.warn("Unsupported HTTP method '{}' attempted. Supported methods: {}", method,
                 supportedMethods != null ? String.join(", ", supportedMethods) : "none");
 
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
+                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
     }
 
     /**
@@ -219,14 +251,120 @@ public class GlobalExceptionHandler {
      * Returns 401 Unauthorized with a user-friendly error message.
      */
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
-    public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException exception) {
-        var errors = new HashMap<String, String>();
-
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException exception,
+                                                                        HttpServletRequest request) {
         String errorMessage = "Invalid email or password";
-        errors.put("error", errorMessage);
         log.warn("Authentication failed: {}", exception.getMessage());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    /**
+     * Handles IllegalArgumentException thrown when invalid arguments are provided.
+     * <p>
+     * This occurs when:
+     * - Invalid data is provided to service methods
+     * - Business logic validation fails
+     * <p>
+     * Returns 400 Bad Request with a descriptive error message.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException exception,
+                                                                         HttpServletRequest request) {
+        log.warn("Illegal argument: {}", exception.getMessage());
+
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(exception.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Handles IllegalStateException thrown when an operation is attempted in an invalid state.
+     * <p>
+     * This occurs when:
+     * - Trying to add a product that already exists in the cart
+     * - Operations that violate business rules or state constraints
+     * <p>
+     * Returns 409 Conflict with a descriptive error message.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException exception,
+                                                                      HttpServletRequest request) {
+        log.warn("Illegal state: {}", exception.getMessage());
+
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(exception.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
+     * Handles NoSuchElementException thrown when a requested element doesn't exist.
+     * <p>
+     * This occurs when:
+     * - Using orElseThrow() on an empty Optional
+     * - Attempting to access a resource that doesn't exist
+     * <p>
+     * Returns 404 Not Found with a descriptive error message.
+     */
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException exception,
+                                                                       HttpServletRequest request) {
+        log.warn("Element not found: {}", exception.getMessage());
+
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(exception.getMessage() != null ? exception.getMessage() : "Resource not found")
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Handles AccessDeniedException thrown when a user tries to access a resource they don't have permission for.
+     * <p>
+     * This occurs when:
+     * - A user without proper role tries to access admin endpoints
+     * - Authorization checks fail
+     * <p>
+     * Returns 403 Forbidden with a descriptive error message.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException exception,
+                                                                      HttpServletRequest request) {
+        log.warn("Access denied: {}", exception.getMessage());
+
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .message("Access denied. You don't have permission to access this resource")
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     /**
@@ -240,13 +378,19 @@ public class GlobalExceptionHandler {
      * that handler will take precedence and this method will not be called.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception exception) {
-        var errors = new HashMap<String, String>();
-
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception exception,
+                                                                 HttpServletRequest request) {
         String errorMessage = "An unexpected error occurred";
-        errors.put("error", errorMessage);
         log.error("Unexpected error occurred: {}", exception.getMessage(), exception);
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }

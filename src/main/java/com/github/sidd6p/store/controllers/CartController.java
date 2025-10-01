@@ -46,15 +46,9 @@ public class CartController {
     @Operation(summary = "Add item to cart", description = "Add a product to the shopping cart.")
     public ResponseEntity<AddItemToCartResponse> addToCart(@PathVariable UUID cartID,
                                                            @RequestBody AddItemToCartRequest addItemToCartRequest) {
-        try {
-            return cartService.addToCart(cartID, addItemToCartRequest)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(409).build();
-        }
+        return cartService.addToCart(cartID, addItemToCartRequest)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{cartID}/items/{productId}")
@@ -62,13 +56,9 @@ public class CartController {
     public ResponseEntity<CartDto> updateCartItemQuantity(@PathVariable UUID cartID,
                                                           @PathVariable Integer productId,
                                                           @Valid @RequestBody UpdateCartItemRequest request) {
-        try {
-            return cartService.updateCartItemQuantity(cartID, productId, request)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return cartService.updateCartItemQuantity(cartID, productId, request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{cartID}/items/{productId}")

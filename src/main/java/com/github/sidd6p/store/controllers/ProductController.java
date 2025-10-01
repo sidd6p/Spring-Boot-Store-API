@@ -62,12 +62,8 @@ public class ProductController {
     @Operation(summary = "Update product", description = "Update an existing product's information.")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Integer id,
                                                     @RequestBody RegisterProductRequest registerProductRequest) {
-        try {
-            return productService.updateProduct(id, registerProductRequest)
-                    .map(ResponseEntity::ok)
-                    .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return productService.updateProduct(id, registerProductRequest)
+                .map(ResponseEntity::ok)
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Map;
 
 @AllArgsConstructor
 @RestController
@@ -30,18 +29,17 @@ public class CheckoutController {
     private final OrderRepository orderRepository;
 
     @PostMapping
-    public ResponseEntity<?> checkout(@Valid @RequestBody CheckoutRequest request) {
-        var cart = cartService.getCartById(request.getCartId()).orElse(null);
-        if (cart == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Cart not found"));
-        }
+    public ResponseEntity<CheckoutResponse> checkout(@Valid @RequestBody CheckoutRequest request) {
+        var cart = cartService.getCartById(request.getCartId())
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+        
         if (cart.getCartItems().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Cart is empty"));
+            throw new IllegalArgumentException("Cart is empty");
         }
 
         var currentUser = authService.getCurrentUser();
         if (currentUser == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+            throw new IllegalStateException("User not authenticated");
         }
 
         var order = Orders.builder()

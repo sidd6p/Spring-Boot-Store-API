@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -43,16 +42,12 @@ public class UserController {
 
     @PostMapping()
     @Operation(summary = "Create new user", description = "Register a new user in the system.")
-    public ResponseEntity<Object> createUser(@RequestHeader("x-auth-token") String authToken,
+    public ResponseEntity<UserDto> createUser(@RequestHeader("x-auth-token") String authToken,
                                              @Valid @RequestBody RegisterUserRequest registerUserRequest,
                                              UriComponentsBuilder uriBuilder) {
-        try {
-            var userDto = userService.createUser(registerUserRequest);
-            var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
-            return ResponseEntity.created(uri).body(userDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        var userDto = userService.createUser(registerUserRequest);
+        var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
+        return ResponseEntity.created(uri).body(userDto);
     }
 
     @PutMapping("/{id}")

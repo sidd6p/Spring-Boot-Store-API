@@ -20,6 +20,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
+
 /**
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │                        AUTHENTICATION FLOW                             │
@@ -98,7 +100,8 @@ public class AuthController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email, request.password)
         );
-        var user = userRepository.findByEmail(request.email).orElseThrow();
+        var user = userRepository.findByEmail(request.email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         var cookie = new Cookie("refreshToken", refreshToken.toString());
@@ -148,7 +151,8 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
 
-        var user = userRepository.findById(jwt.getUserId()).orElseThrow();
+        var user = userRepository.findById(jwt.getUserId())
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
         var newAccessToken = jwtService.generateAccessToken(user);
 
         return ResponseEntity.ok(new JwtResponse(newAccessToken.toString()));
