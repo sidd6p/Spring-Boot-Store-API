@@ -1,17 +1,9 @@
 # Spring Boot supports both application.yaml and application.properties for configuration.
 #   - application.yaml takes precedence over application.properties for overlapping properties.
 #   - Properties unique to application.properties will still be loaded if not present in application.yaml.
-
-# The active profile is set to 'dev' below.
-# This causes Spring Boot to load properties from 'application-dev.yaml'.
-# Properties in 'application-dev.yaml' override the properties in this file.
-# For example, 'spring.application.name' will be 'store-dev' from the dev profile,
-# not 'store' as defined here.
 spring:
-  profiles:
-    active: dev
   application:
-    name: store
+    name: store-prod
   datasource:
     url: jdbc:mysql://localhost:3307/store_api?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER}
