@@ -105,7 +105,7 @@ CREATE TABLE
     `total_price` decimal(10, 2) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `orders_customer_id_fk` (`customer_id`),
-    CONSTRAINT `orders_customer_id_fk` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`)
+    CONSTRAINT `orders_customer_id_fk` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE
@@ -119,6 +119,6 @@ CREATE TABLE
     PRIMARY KEY (`id`),
     KEY `order_items_orders_id_fk` (`order_id`),
     KEY `order_items_products_id_fk` (`product_id`),
-    CONSTRAINT `order_items_orders_id_fk` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
+    CONSTRAINT `order_items_orders_id_fk` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
     CONSTRAINT `order_items_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;

@@ -1,1154 +1,1674 @@
 {
-	"info": {
-		"_postman_id": "8d720720-e246-4d4b-91a5-422109af17a4",
-		"name": "Spring-Boot-Store-API",
-		"description": "Complete API documentation for the Spring Boot Store application.\n\n**Execution Order:**\nThis collection is organized for linear execution - run folders/requests from top to bottom:\n\n**Quick Start (Main Flow):**\n1. Setup & Authentication → Create User (step 1) → Login (step 2) → Get Me (step 3)\n2. Product Management → Get All Products (step 1, auto-saves product_id)\n3. Shopping Flow → Create Cart (step 1) → Add Item to Cart (step 3) → Checkout (step 7)\n\n**All Phases:**\n1. Setup & Authentication - Create user and login\n2. Product Management - Browse and manage products (creates/updates use separate product ID)\n3. Shopping Flow - Create cart, add items, checkout (steps 5-6 optional, run BEFORE step 7)\n4. User Profile Management - Update user details (auto-updates variables)\n5. Admin Operations - Admin-only endpoints\n6. Utility Endpoints - Testing and public endpoints",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "37763925"
-	},
-	"item": [
-		{
-			"name": "1. Setup & Authentication",
-			"item": [
-				{
-					"name": "1. Create User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save created user details to collection variables",
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    if (response.id) {",
-									"        pm.collectionVariables.set(\"user_id\", response.id);",
-									"        console.log(\"User ID saved: \" + response.id);",
-									"    }",
-									"    // Save email, password, and username for login and reference",
-									"    const requestBody = JSON.parse(pm.request.body.raw);",
-									"    pm.collectionVariables.set(\"user_email\", requestBody.email);",
-									"    pm.collectionVariables.set(\"user_password\", requestBody.password);",
-									"    pm.collectionVariables.set(\"user_name\", requestBody.user_name);",
-									"    console.log(\"User credentials saved: \" + requestBody.email);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"description": "Custom auth token (required by backend)",
-								"type": "string"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user_name\": \"TestUser123\",\n    \"email\": \"test@dummy.com\",\n    \"password\": \"dummypass123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							]
-						},
-						"description": "**STEP 1:** Create a new user account.\n\nThis is the first step in the workflow - creates a user and saves credentials for subsequent requests.\n\n**Request Body:**\n- `user_name` (string, required): Username\n- `email` (string, required): User's email (must be lowercase)\n- `password` (string, required): Password (8-20 characters)\n\n**Auto-saves:** User ID, email, password, username for use in other requests"
-					},
-					"response": []
-				},
-				{
-					"name": "2. Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save JWT token to collection variable",
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.token) {",
-									"        pm.collectionVariables.set(\"jwt_token\", response.token);",
-									"        console.log(\"JWT token saved: \" + response.token.substring(0, 20) + \"...\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						},
-						"description": "**STEP 2:** Login with the created user credentials.\n\nAuthenticates the user and obtains a JWT token for subsequent authenticated requests.\n\n**Uses:** Email and password from Step 1\n\n**Auto-saves:** JWT token for authentication"
-					},
-					"response": []
-				},
-				{
-					"name": "3. Get Current User (Me)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/me",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"me"
-							]
-						},
-						"description": "**STEP 3:** Verify authentication by fetching current user details.\n\nConfirms that the JWT token is working correctly."
-					},
-					"response": []
-				},
-				{
-					"name": "4. Validate Token",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/validate",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"validate"
-							]
-						},
-						"description": "**Optional:** Validate that the JWT token is valid and not expired.\n\nReturns true/false based on token validity."
-					},
-					"response": []
-				},
-				{
-					"name": "5. Refresh Token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save refreshed JWT token to collection variable",
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.token) {",
-									"        pm.collectionVariables.set(\"jwt_token\", response.token);",
-									"        console.log(\"Refreshed JWT token saved: \" + response.token.substring(0, 20) + \"...\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/auth/refresh",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"refresh"
-							]
-						},
-						"description": "**Optional:** Refresh the access token using the refresh token cookie.\n\nUse this when the JWT token expires to get a new one without re-logging in."
-					},
-					"response": []
-				}
-			],
-			"description": "**Phase 1: Authentication Setup**\n\nExecute these endpoints in order to:\n1. Create a user account\n2. Login and obtain JWT token\n3. Verify authentication is working\n\nAll subsequent requests will use the JWT token saved here."
-		},
-		{
-			"name": "2. Product Management",
-			"item": [
-				{
-					"name": "1. Get All Products",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save first product ID if product_id is not set",
-									"if (pm.response.code === 200) {",
-									"    const products = pm.response.json();",
-									"    if (Array.isArray(products) && products.length > 0) {",
-									"        const currentProductId = pm.collectionVariables.get(\"product_id\");",
-									"        if (!currentProductId) {",
-									"            pm.collectionVariables.set(\"product_id\", products[0].id);",
-									"            console.log(\"Auto-saved first product ID: \" + products[0].id);",
-									"        }",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/products",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products"
-							]
-						},
-						"description": "**STEP 4:** Browse all available products.\n\nRetrieves the product catalog. Auto-saves the first product ID for adding to cart.\n\n**Query Parameters:**\n- `category` (optional): Filter by category name\n\n**Auto-saves:** First product ID if not already set"
-					},
-					"response": []
-				},
-				{
-					"name": "2. Get Product by ID",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/products/{{product_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"{{product_id}}"
-							]
-						},
-						"description": "**Optional:** View details of a specific product.\n\nUses the product ID saved from the previous request."
-					},
-					"response": []
-				},
-				{
-					"name": "3. Create Product",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Save created product to a separate variable to avoid overwriting existing product_id",
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    if (response.id) {",
-									"        // Save to created_product_id instead of product_id",
-									"        pm.collectionVariables.set(\"created_product_id\", response.id);",
-									"        console.log(\"Created product ID saved to 'created_product_id': \" + response.id);",
-									"        console.log(\"NOTE: Main 'product_id' preserved for cart operations\");",
-									"    }",
-									"    const requestBody = JSON.parse(pm.request.body.raw);",
-									"    pm.collectionVariables.set(\"product_name\", requestBody.name);",
-									"    pm.collectionVariables.set(\"product_price\", requestBody.price);",
-									"    console.log(\"Product details saved: \" + requestBody.name);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"price\": 99.99,\n    \"name\": \"Test Product\",\n    \"category_id\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/products",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products"
-							]
-						},
-						"description": "**Optional:** Create a new product.\n\nUse this if you want to create a custom product for testing.\n\n**Auto-saves:** Product details to 'created_product_id' (separate from main 'product_id' used for cart)\n\n**Note:** This does NOT overwrite the 'product_id' from 'Get All Products' to ensure cart operations work correctly."
-					},
-					"response": []
-				},
-				{
-					"name": "4. Update Product",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Product Name\",\n    \"category_id\": 2,\n    \"price\": 149.99\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/products/{{created_product_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"{{created_product_id}}"
-							]
-						},
-						"description": "**Optional:** Update the created product.\n\nModifies the product created in step 3. Uses 'created_product_id' variable."
-					},
-					"response": []
-				},
-				{
-					"name": "5. Delete Product",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/products/{{created_product_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"products",
-								"{{created_product_id}}"
-							]
-						},
-						"description": "**Optional:** Delete the created product.\n\nDeletes the product created in step 3. Uses 'created_product_id' to avoid affecting the main product used for cart operations.\n\n**Safe to run:** This won't affect the product_id used for adding items to cart."
-					},
-					"response": []
-				}
-			],
-			"description": "**Phase 2: Product Catalog**\n\nBrowse and manage products:\n1. View all products (auto-saves product ID)\n2. View specific product details\n3. (Optional) Create, update, or delete products"
-		},
-		{
-			"name": "3. Shopping Flow",
-			"item": [
-				{
-					"name": "1. Create Cart",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save created cart ID to collection variable",
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    if (response.id) {",
-									"        pm.collectionVariables.set(\"cart_id\", response.id);",
-									"        console.log(\"Cart ID saved: \" + response.id);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/carts",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts"
-							]
-						},
-						"description": "**STEP 5:** Create a new shopping cart.\n\nInitiates the shopping process by creating an empty cart.\n\n**Auto-saves:** Cart ID for adding items"
-					},
-					"response": []
-				},
-				{
-					"name": "2. Get Cart by ID",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/carts/{{cart_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"{{cart_id}}"
-							]
-						},
-						"description": "**Optional:** View current cart contents.\n\nVerify that the cart was created successfully."
-					},
-					"response": []
-				},
-				{
-					"name": "3. Add Item to Cart",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"productId\": {{product_id}}\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/carts/{{cart_id}}/items",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"{{cart_id}}",
-								"items"
-							]
-						},
-						"description": "**STEP 6:** Add a product to the cart.\n\nAdds the product (from Step 4) to the cart (from Step 5)."
-					},
-					"response": []
-				},
-				{
-					"name": "4. Update Cart Item Quantity",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"quantity\": 5\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/carts/{{cart_id}}/items/{{product_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"{{cart_id}}",
-								"items",
-								"{{product_id}}"
-							]
-						},
-						"description": "**Optional:** Update the quantity of an item in the cart.\n\nChange the quantity from 1 to a higher number."
-					},
-					"response": []
-				},
-				{
-					"name": "5. Remove Item from Cart",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/carts/{{cart_id}}/items/{{product_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"{{cart_id}}",
-								"items",
-								"{{product_id}}"
-							]
-						},
-						"description": "**Optional:** Remove a specific item from the cart.\n\nNOTE: Use this to test removing items. Execute before checkout if needed."
-					},
-					"response": []
-				},
-				{
-					"name": "6. Clear Cart",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/carts/{{cart_id}}/items",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"carts",
-								"{{cart_id}}",
-								"items"
-							]
-						},
-						"description": "**Optional:** Remove all items from the cart.\n\nNOTE: Use this to empty the cart. Execute before checkout if you want to test clearing."
-					},
-					"response": []
-				},
-				{
-					"name": "7. Checkout",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Auto-save order ID from checkout",
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.orderId) {",
-									"        pm.collectionVariables.set(\"order_id\", response.orderId);",
-									"        console.log(\"Order ID saved: \" + response.orderId);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"cartId\": \"{{cart_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/checkout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"checkout"
-							]
-						},
-						"description": "**STEP 7:** Complete the purchase.\n\nProcesses the cart and creates an order. The cart will be cleared after checkout.\n\n**Auto-saves:** Order ID\n\n**Important:** \n- Execute this AFTER adding items (step 3)\n- Skip steps 5-6 (Remove/Clear) for successful checkout\n- If you ran steps 5 or 6, re-add items before checkout"
-					},
-					"response": []
-				}
-			],
-			"description": "**Phase 3: Shopping & Checkout**\n\nComplete shopping workflow:\n1. Create Cart - Initialize empty cart\n2. Get Cart by ID - View cart (optional)\n3. Add Item to Cart - Add product to cart\n4. Update Cart Item Quantity - Change quantities (optional)\n5. Remove Item from Cart - Remove specific item (optional, BEFORE checkout)\n6. Clear Cart - Empty entire cart (optional, BEFORE checkout)\n7. Checkout - Complete purchase (clears cart)\n\n**For successful checkout:** Run steps 1→3→7 (skip 4-6)\n**To test remove/clear:** Run steps 1→3→5 or 6→(re-add items)→7"
-		},
-		{
-			"name": "4. User Profile Management",
-			"item": [
-				{
-					"name": "1. Get All Users",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users?sort=id",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "id"
-								}
-							]
-						},
-						"description": "**Optional:** View all users in the system.\n\n**Query Parameters:**\n- `sort`: Field to sort by (id, name, email)"
-					},
-					"response": []
-				},
-				{
-					"name": "2. Get User by ID",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "**Optional:** View specific user details.\n\nRetrieves the user created in Step 1."
-					},
-					"response": []
-				},
-				{
-					"name": "3. Update User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Update collection variables if user details changed",
-									"if (pm.response.code === 200) {",
-									"    const requestBody = JSON.parse(pm.request.body.raw);",
-									"    if (requestBody.email) {",
-									"        pm.collectionVariables.set(\"user_email\", requestBody.email);",
-									"        console.log(\"User email updated to: \" + requestBody.email);",
-									"    }",
-									"    if (requestBody.user_name) {",
-									"        pm.collectionVariables.set(\"user_name\", requestBody.user_name);",
-									"        console.log(\"User name updated to: \" + requestBody.user_name);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "x-auth-token",
-								"value": "asfgfdv",
-								"description": "Custom auth token (required by backend)",
-								"type": "string"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"user_name\": \"UpdatedDummyUser\",\n    \"email\": \"updated.dummy@testmail.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "**Optional:** Update user profile information.\n\nModify the user's name or email address.\n\n**Auto-updates:** Collection variables (user_email, user_name) are updated with new values."
-					},
-					"response": []
-				},
-				{
-					"name": "4. Change Password",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Update password variable if password changed successfully",
-									"if (pm.response.code === 200) {",
-									"    const requestBody = JSON.parse(pm.request.body.raw);",
-									"    if (requestBody.new_password) {",
-									"        pm.collectionVariables.set(\"user_password\", requestBody.new_password);",
-									"        console.log(\"User password updated in collection variables\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"new_password\": \"newdummypass456\",\n    \"old_password\": \"{{user_password}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}/change-password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"{{user_id}}",
-								"change-password"
-							]
-						},
-						"description": "**Optional:** Change user password.\n\nRequires the old password for verification.\n\n**Auto-updates:** Collection variable 'user_password' is updated with the new password."
-					},
-					"response": []
-				},
-				{
-					"name": "5. Delete User",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "**Optional:** Delete the user account.\n\nWARNING: Run this last if testing user management, as it will delete the user and invalidate the JWT token."
-					},
-					"response": []
-				}
-			],
-			"description": "**Phase 4: User Profile Management**\n\nManage user accounts:\n1. View all users\n2. View specific user\n3. Update profile information\n4. Change password\n5. Delete user account (cleanup)"
-		},
-		{
-			"name": "5. Admin Operations",
-			"item": [
-				{
-					"name": "1. Admin Hello",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/admin/hello",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"admin",
-								"hello"
-							]
-						},
-						"description": "**Admin Only:** Test endpoint for admin access verification.\n\nNOTE: Requires ADMIN role. Regular users will receive 403 Forbidden.\n\n**Status Codes:**\n- 200: Access granted (user has ADMIN role)\n- 403: Forbidden (user doesn't have ADMIN role)"
-					},
-					"response": []
-				}
-			],
-			"description": "**Phase 5: Admin Endpoints**\n\nAdmin-only operations requiring ADMIN role.\n\nNote: The default user created in Step 1 has USER role and will receive 403 Forbidden for these endpoints."
-		},
-		{
-			"name": "6. Utility Endpoints",
-			"item": [
-				{
-					"name": "1. Message V2 (Public)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v2/message",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"v2",
-								"message"
-							]
-						},
-						"description": "**Public endpoint:** Returns a message object as JSON.\n\nNo authentication required - useful for testing API connectivity."
-					},
-					"response": []
-				},
-				{
-					"name": "2. Message V1 (Authenticated)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/v1/message",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"v1",
-								"message"
-							]
-						},
-						"description": "**Authenticated endpoint:** Returns a plain text message.\n\nRequires JWT token - demonstrates authentication."
-					},
-					"response": []
-				},
-				{
-					"name": "3. Home Page",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								""
-							]
-						},
-						"description": "**HTML endpoint:** Returns the home page.\n\nRenders an HTML page using Thymeleaf template engine."
-					},
-					"response": []
-				}
-			],
-			"description": "**Phase 6: Utility & Testing Endpoints**\n\nMiscellaneous endpoints for testing:\n- Public message endpoint (no auth)\n- Authenticated message endpoint\n- Home page (HTML response)\n\nUseful for testing API connectivity and authentication."
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8080",
-			"type": "string"
-		},
-		{
-			"key": "jwt_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_name",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_email",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_password",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "product_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "created_product_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "product_name",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "product_price",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "cart_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "order_id",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "8d720720-e246-4d4b-91a5-422109af17a4",
+    "name": "Spring-Boot-Store-API",
+    "description": "Complete API documentation for the Spring Boot Store application.\n\n**Execution Order:**\nThis collection is organized for linear execution - run folders/requests from top to bottom:\n\n**Quick Start (Main Flow):**\n1. Setup & Authentication → Create User (step 1) → Login (step 2) → Get Me (step 3)\n2. Product Management → Get All Products (step 1, auto-saves product_id)\n3. Shopping Flow → Create Cart (step 1) → Add Item to Cart (step 3) → Checkout (step 5 - auto-cleans cart)\n4. Cleanup Operations → Delete created products and user\n\n**All Phases:**\n1. Setup & Authentication - Create user and login\n2. Product Management - Browse and manage products (creates/updates use separate product ID)\n3. Shopping Flow - Create cart, add items, checkout (cart auto-cleaned after checkout)\n4. User Profile Management - Update user details (auto-updates variables)\n5. Admin Operations - Admin-only endpoints\n6. Utility Endpoints - Testing and public endpoints\n7. Cleanup Operations - Delete test products and user (run LAST)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37763925"
+  },
+  "item": [
+    {
+      "name": "1. Setup & Authentication",
+      "item": [
+        {
+          "name": "1. Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const requestBody = JSON.parse(pm.request.body.raw);",
+                  "pm.collectionVariables.set(\"user_email\", requestBody.email);",
+                  "pm.collectionVariables.set(\"user_password\", requestBody.password);",
+                  "pm.collectionVariables.set(\"user_name\", requestBody.user_name);",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"user_id\", responseData.id);",
+                  "    console.log(\"User created successfully with ID: \" + responseData.id);",
+                  "} else {",
+                  "    console.log(\"User creation failed with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "description": "Custom auth token (required by backend)",
+                "type": "string"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_name\": \"TestUser123\",\n    \"email\": \"test@dummy.com\",\n    \"password\": \"dummypass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "**STEP 1:** Create a new user account.\n\nThis is the first step in the workflow - creates a user and saves credentials for subsequent requests.\n\n**Request Body:**\n- `name` (string, required): Username\n- `email` (string, required): User's email (must be lowercase)\n- `password` (string, required): Password (8-20 characters)\n\n**Auto-saves:** User ID, email, password, username for use in other requests"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"jwt_token\", responseData.token);",
+                  "    console.log(\"Login successful, JWT token saved\");",
+                  "    ",
+                  "    // Extract refresh token from cookies",
+                  "    const cookies = pm.response.headers.get('Set-Cookie');",
+                  "    if (cookies) {",
+                  "        const refreshTokenMatch = cookies.match(/refreshToken=([^;]+)/);",
+                  "        if (refreshTokenMatch) {",
+                  "            pm.collectionVariables.set(\"refresh_token\", refreshTokenMatch[1]);",
+                  "            console.log(\"Refresh token saved from cookie\");",
+                  "        }",
+                  "    }",
+                  "} else {",
+                  "    console.log(\"Login failed with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**STEP 2:** Login with the created user credentials.\n\nAuthenticates the user and obtains a JWT token for subsequent authenticated requests.\n\n**Uses:** Email and password from Step 1\n\n**Auto-saves:** JWT token for authentication and refresh token from cookie"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Current User (Me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"user_id\", responseData.id);",
+                  "    console.log(\"Current user ID confirmed: \" + responseData.id);",
+                  "} else {",
+                  "    console.log(\"Failed to get current user with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "**STEP 3:** Verify authentication by fetching current user details.\n\nConfirms that the JWT token is working correctly and saves/confirms the user ID."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Validate Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const isValid = pm.response.json();",
+                  "    console.log(\"Token validation result: \" + isValid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "validate"
+              ]
+            },
+            "description": "**Optional:** Validate that the JWT token is valid and not expired.\n\nReturns true/false based on token validity."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"jwt_token\", responseData.token);",
+                  "    console.log(\"Access token refreshed successfully\");",
+                  "} else {",
+                  "    console.log(\"Token refresh failed with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "refreshToken={{refresh_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "**Optional:** Refresh the access token using the refresh token cookie.\n\nUse this when the JWT token expires to get a new one without re-logging in.\n\n**Note:** Uses the refresh token saved from login step."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 1: Authentication Setup**\n\nExecute these endpoints in order to:\n1. Create a user account\n2. Login and obtain JWT token\n3. Verify authentication is working\n\nAll subsequent requests will use the JWT token saved here."
+    },
+    {
+      "name": "2. Product Management",
+      "item": [
+        {
+          "name": "1. Get All Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const products = pm.response.json();",
+                  "    if (products.length > 0) {",
+                  "        // Save first product for cart operations",
+                  "        pm.collectionVariables.set(\"product_id\", products[0].id);",
+                  "        pm.collectionVariables.set(\"product_name\", products[0].name);",
+                  "        pm.collectionVariables.set(\"product_price\", products[0].price);",
+                  "        console.log(\"First product saved: ID=\" + products[0].id + \", Name=\" + products[0].name);",
+                  "    } else {",
+                  "        console.log(\"No products found in the system\");",
+                  "    }",
+                  "} else {",
+                  "    console.log(\"Failed to get products with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by category name"
+                }
+              ]
+            },
+            "description": "**STEP 4:** Browse all available products.\n\nRetrieves the product catalog. Auto-saves the first product details for adding to cart.\n\n**Query Parameters:**\n- `category` (optional): Filter by category name\n\n**Auto-saves:** First product ID, name, and price for cart operations"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Product by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const product = pm.response.json();",
+                  "    console.log(\"Product details: \" + JSON.stringify(product));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{product_id}}"
+              ]
+            },
+            "description": "**Optional:** View details of a specific product.\n\nUses the product ID saved from the previous request."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const product = pm.response.json();",
+                  "    pm.collectionVariables.set(\"created_product_id\", product.id);",
+                  "    console.log(\"Product created successfully with ID: \" + product.id);",
+                  "} else {",
+                  "    console.log(\"Product creation failed with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 99.99,\n    \"name\": \"Test Product - {{$timestamp}}\",\n    \"category_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            },
+            "description": "**Optional:** Create a new product.\n\nUse this if you want to create a custom product for testing. Product name includes timestamp to ensure uniqueness.\n\n**Auto-saves:** Product ID to 'created_product_id' (separate from main 'product_id' used for cart)\n\n**Note:** This does NOT overwrite the 'product_id' from 'Get All Products' to ensure cart operations work correctly."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const product = pm.response.json();",
+                  "    console.log(\"Product updated successfully: \" + JSON.stringify(product));",
+                  "} else {",
+                  "    console.log(\"Product update failed with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Product Name - {{$timestamp}}\",\n    \"category_id\": 2,\n    \"price\": 149.99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products/{{created_product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{created_product_id}}"
+              ]
+            },
+            "description": "**Optional:** Update the created product.\n\nModifies the product created in step 3. Uses 'created_product_id' variable."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 2: Product Catalog**\n\nBrowse and manage products:\n1. View all products (auto-saves product ID)\n2. View specific product details\n3. (Optional) Create, update, or delete products"
+    },
+    {
+      "name": "3. Shopping Flow",
+      "item": [
+        {
+          "name": "1. Create Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const cart = pm.response.json();",
+                  "    pm.collectionVariables.set(\"cart_id\", cart.id);",
+                  "    console.log(\"Cart created successfully with ID: \" + cart.id);",
+                  "} else {",
+                  "    console.log(\"Cart creation failed with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            },
+            "description": "**STEP 5:** Create a new shopping cart.\n\nInitiates the shopping process by creating an empty cart.\n\n**Auto-saves:** Cart ID for adding items"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Cart by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const cart = pm.response.json();",
+                  "    console.log(\"Cart contents: \" + JSON.stringify(cart));",
+                  "    console.log(\"Total items: \" + cart.cartItems.length);",
+                  "    console.log(\"Total price: \" + cart.price);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}"
+              ]
+            },
+            "description": "**Optional:** View current cart contents.\n\nVerify cart status and see all items added."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Add Item to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log(\"Item added to cart successfully\");",
+                  "    console.log(\"Response: \" + JSON.stringify(response));",
+                  "} else {",
+                  "    console.log(\"Failed to add item to cart with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": {{product_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items"
+              ]
+            },
+            "description": "**STEP 6:** Add a product to the cart.\n\nAdds the product (from Step 4) to the cart (from Step 5). Default quantity is 1."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Cart Item Quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const cart = pm.response.json();",
+                  "    console.log(\"Cart item quantity updated successfully\");",
+                  "    console.log(\"Updated cart: \" + JSON.stringify(cart));",
+                  "} else {",
+                  "    console.log(\"Failed to update cart item with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"quantity\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items",
+                "{{product_id}}"
+              ]
+            },
+            "description": "**Optional:** Update the quantity of an item in the cart.\n\nChange the quantity from default (1) to any other number."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Remove Item from Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    console.log(\"Item removed from cart successfully\");",
+                  "} else {",
+                  "    console.log(\"Failed to remove item from cart with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items",
+                "{{product_id}}"
+              ]
+            },
+            "description": "**Optional:** Remove a specific item from the cart.\n\nUse this if you want to remove an item before checkout."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Clear Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    console.log(\"Cart cleared successfully\");",
+                  "} else {",
+                  "    console.log(\"Failed to clear cart with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items"
+              ]
+            },
+            "description": "**Optional:** Clear all items from the cart.\n\nRemoves all items but keeps the cart. Note: Checkout also clears the cart automatically."
+          },
+          "response": []
+        },
+        {
+          "name": "6.1. Re-add Item for Checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log(\"Item re-added to cart for checkout\");",
+                  "    console.log(\"Cart is now ready for checkout\");",
+                  "} else {",
+                  "    console.log(\"Failed to re-add item with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": {{product_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items"
+              ]
+            },
+            "description": "**Pre-Checkout:** Re-add item to cart to ensure checkout succeeds.\n\nThis step ensures the cart has at least one item before attempting checkout, preventing 400 Bad Request errors."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Checkout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Prepare for checkout",
+                  "console.log(\"Preparing checkout for cart ID: \" + pm.collectionVariables.get(\"cart_id\"));",
+                  "console.log(\"Note: If cart is empty, this checkout will fail with 400 Bad Request\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"order_id\", response.orderId);",
+                  "    console.log(\"Checkout successful! Order ID: \" + response.orderId);",
+                  "    console.log(\"Cart has been automatically cleared\");",
+                  "} else if (pm.response.code === 400) {",
+                  "    console.log(\"Checkout failed: Cart is empty or invalid\");",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "    console.log(\"To fix: Run 'Re-add Item for Checkout' before this step\");",
+                  "} else {",
+                  "    console.log(\"Checkout failed with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"cartId\": \"{{cart_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/checkout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "checkout"
+              ]
+            },
+            "description": "**STEP 7:** Complete the purchase.\n\nProcesses the cart and creates an order. The cart and all items are automatically cleared after successful checkout.\n\n**Auto-saves:** Order ID\n\n**Important:** \n- Execute this AFTER adding items (step 3)\n- Cart must have at least one item for successful checkout\n- Cart is automatically cleaned - no manual cleanup needed"
+          },
+          "response": []
+        },
+        {
+          "name": "8. Add Item After Checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log(\"Item added to cart after checkout\");",
+                  "    console.log(\"This demonstrates cart can be reused after checkout\");",
+                  "} else {",
+                  "    console.log(\"Failed to add item after checkout with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": {{product_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items"
+              ]
+            },
+            "description": "**Post-Checkout:** Add item to cart after checkout.\n\nDemonstrates that the cart can be reused after checkout for additional shopping."
+          },
+          "response": []
+        },
+        {
+          "name": "9. Final Clear Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    console.log(\"Cart finally cleared successfully\");",
+                  "    console.log(\"Shopping flow completed successfully\");",
+                  "} else {",
+                  "    console.log(\"Failed to clear cart with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/carts/{{cart_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "carts",
+                "{{cart_id}}",
+                "items"
+              ]
+            },
+            "description": "**Final Cleanup:** Clear all items from cart at the end.\n\nFinal step to clean up the cart after demonstrating the complete workflow."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 3: Shopping & Checkout**\n\nComplete shopping workflow:\n1. Create Cart - Initialize empty cart\n2. Get Cart by ID - View cart (optional)\n3. Add Item to Cart - Add product to cart\n4. Update Cart Item Quantity - Change quantities (optional)\n5. Remove Item from Cart - Remove specific item (optional)\n6. Clear Cart - Remove all items (optional)\n7. Checkout - Complete purchase (automatically clears cart)\n\n**For successful checkout:** Run steps 1→3→7\n**Note:** Cart is automatically cleaned after checkout!"
+    },
+    {
+      "name": "4. User Profile Management",
+      "item": [
+        {
+          "name": "1. Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const users = pm.response.json();",
+                  "    console.log(\"Total users: \" + users.length);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?sort=id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "id",
+                  "description": "Sort by field (id, name, email)"
+                }
+              ]
+            },
+            "description": "**Optional:** View all users in the system.\n\n**Query Parameters:**\n- `sort`: Field to sort by (id, name, email)"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const user = pm.response.json();",
+                  "    console.log(\"User details: \" + JSON.stringify(user));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "**Optional:** View specific user details.\n\nRetrieves the user created in Step 1."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Update User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const user = pm.response.json();",
+                  "    // Update collection variables with new values",
+                  "    pm.collectionVariables.set(\"user_email\", user.email);",
+                  "    pm.collectionVariables.set(\"user_name\", user.name);",
+                  "    console.log(\"User updated successfully\");",
+                  "    console.log(\"New email: \" + user.email);",
+                  "    console.log(\"New name: \" + user.name);",
+                  "} else {",
+                  "    console.log(\"User update failed with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "asfgfdv",
+                "description": "Custom auth token (required by backend)",
+                "type": "string"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_name\": \"UpdatedUser {{$timestamp}}\",\n    \"email\": \"updated{{$timestamp}}@testmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "**Optional:** Update user profile information.\n\nModify the user's name or email address. Uses timestamp to ensure unique email.\n\n**Auto-updates:** Collection variables (user_email, user_name) are updated with new values."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const requestBody = JSON.parse(pm.request.body.raw);",
+                  "    pm.collectionVariables.set(\"user_password\", requestBody.new_password);",
+                  "    console.log(\"Password changed successfully\");",
+                  "    console.log(\"New password saved to collection variables\");",
+                  "} else {",
+                  "    console.log(\"Password change failed with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"new_password\": \"{{new_password}}\",\n    \"old_password\": \"{{user_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}",
+                "change-password"
+              ]
+            },
+            "description": "**Optional:** Change user password.\n\nRequires the old password for verification.\n\n**Auto-updates:** Collection variable 'user_password' is updated with the new password."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 4: User Profile Management**\n\nManage user accounts:\n1. View all users\n2. View specific user\n3. Update profile information\n4. Change password\n\n**Note:** DELETE operations are in the Cleanup Operations section"
+    },
+    {
+      "name": "5. Admin Operations",
+      "item": [
+        {
+          "name": "1. Admin Hello",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log(\"Admin access granted\");",
+                  "} else if (pm.response.code === 403) {",
+                  "    console.log(\"Access denied - user doesn't have ADMIN role\");",
+                  "} else {",
+                  "    console.log(\"Request failed with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/hello",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "hello"
+              ]
+            },
+            "description": "**Admin Only:** Test endpoint for admin access verification.\n\nNOTE: Requires ADMIN role. Regular users will receive 403 Forbidden.\n\n**Status Codes:**\n- 200: Access granted (user has ADMIN role)\n- 403: Forbidden (user doesn't have ADMIN role)"
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 5: Admin Endpoints**\n\nAdmin-only operations requiring ADMIN role.\n\nNote: The default user created in Step 1 has USER role and will receive 403 Forbidden for these endpoints."
+    },
+    {
+      "name": "6. Utility Endpoints",
+      "item": [
+        {
+          "name": "1. Message V2 (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const message = pm.response.json();",
+                  "    console.log(\"Public message: \" + message.message);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v2/message",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v2",
+                "message"
+              ]
+            },
+            "description": "**Public endpoint:** Returns a message object as JSON.\n\nNo authentication required - useful for testing API connectivity."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Message V1 (Authenticated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log(\"Authenticated message: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/message",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "message"
+              ]
+            },
+            "description": "**Authenticated endpoint:** Returns a plain text message.\n\nRequires JWT token - demonstrates authentication is working."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Home Page",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log(\"Home page loaded successfully\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "**HTML endpoint:** Returns the home page.\n\nRenders an HTML page using Thymeleaf template engine."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 6: Utility & Testing Endpoints**\n\nMiscellaneous endpoints for testing:\n- Public message endpoint (no auth)\n- Authenticated message endpoint\n- Home page (HTML response)\n\nUseful for testing API connectivity and authentication."
+    },
+    {
+      "name": "7. Cleanup Operations",
+      "item": [
+        {
+          "name": "1. Delete Created Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    console.log(\"Product deleted successfully\");",
+                  "    pm.collectionVariables.unset(\"created_product_id\");",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log(\"Product not found - may have been already deleted\");",
+                  "} else {",
+                  "    console.log(\"Product deletion failed with status: \" + pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{created_product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "{{created_product_id}}"
+              ]
+            },
+            "description": "**Cleanup:** Delete the product created during testing.\n\nDeletes the product created in 'Product Management > Create Product'. Uses 'created_product_id' variable.\n\n**Note:** This only deletes products YOU created, not the existing products used for cart operations."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Delete User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "    console.log(\"User deleted successfully\");",
+                  "    console.log(\"All related data (orders, addresses, profiles) automatically deleted\");",
+                  "    console.log(\"JWT token is now invalid\");",
+                  "    // Clear all user-related variables",
+                  "    pm.collectionVariables.unset(\"user_id\");",
+                  "    pm.collectionVariables.unset(\"user_email\");",
+                  "    pm.collectionVariables.unset(\"user_password\");",
+                  "    pm.collectionVariables.unset(\"user_name\");",
+                  "    pm.collectionVariables.unset(\"jwt_token\");",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log(\"User not found - may have been already deleted\");",
+                  "} else {",
+                  "    console.log(\"User deletion failed with status: \" + pm.response.code);",
+                  "    console.log(\"Response: \" + pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "**Cleanup:** Delete the test user account.\n\nThis will automatically delete all related user data including orders, addresses, and profiles due to cascade deletion in the database.\n\n**Status Codes:**\n- 204: User and all related data deleted successfully\n- 404: User not found\n\n**Auto-clears:** All user-related variables (user_id, user_email, user_password, user_name, jwt_token) on successful deletion"
+          },
+          "response": []
+        }
+      ],
+      "description": "**Phase 7: Cleanup Operations**\n\nDelete operations for cleaning up test data. Run these AFTER testing all other functionality.\n\n**What to clean up:**\n1. Delete Product - Remove any products you created during testing\n2. Delete User - Remove the test user (run LAST, invalidates JWT token)\n\n**Note about Cart:** Cart and cart items are automatically cleaned by the checkout endpoint, so no manual cleanup is needed.\n\n**Execution Order:** Delete Product → Delete User (last)"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "created_product_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_price",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cart_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "new_password",
+      "value": "newdummypass456",
+      "type": "string"
+    }
+  ]
 }

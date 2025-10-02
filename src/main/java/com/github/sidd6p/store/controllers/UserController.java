@@ -43,8 +43,8 @@ public class UserController {
     @PostMapping()
     @Operation(summary = "Create new user", description = "Register a new user in the system.")
     public ResponseEntity<UserDto> createUser(@RequestHeader("x-auth-token") String authToken,
-                                             @Valid @RequestBody RegisterUserRequest registerUserRequest,
-                                             UriComponentsBuilder uriBuilder) {
+                                              @Valid @RequestBody RegisterUserRequest registerUserRequest,
+                                              UriComponentsBuilder uriBuilder) {
         var userDto = userService.createUser(registerUserRequest);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto);

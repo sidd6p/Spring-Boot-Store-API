@@ -75,7 +75,11 @@ public class UserService implements UserDetailsService {
 
         return userRepository.findById(id)
                 .map(user -> {
+                    // Preserve the existing password when updating user details
+                    String existingPassword = user.getPassword();
                     user.updateFromRequest(userUpdateRequest.getUser_name(), userUpdateRequest.getEmail());
+                    // Restore the password after update
+                    user.setPassword(existingPassword);
                     userRepository.save(user);
                     return userMapper.toDto(user);
                 });
@@ -86,6 +90,7 @@ public class UserService implements UserDetailsService {
 
         return userRepository.findById(id)
                 .map(user -> {
+                    // With cascade delete in the database, this should now work without issues
                     userRepository.delete(user);
                     return true;
                 })
@@ -97,8 +102,11 @@ public class UserService implements UserDetailsService {
 
         return userRepository.findById(id)
                 .map(user -> {
-                    if (user.changePassword(changePasswordRequest.getOldPassword(),
-                            changePasswordRequest.getNewPassword())) {
+                    // Use password encoder to verify the old password matches the stored encoded password
+                    if (passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+                        // Encode the new password before storing it
+                        String encodedNewPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+                        user.setPassword(encodedNewPassword);
                         userRepository.save(user);
                         return true;
                     }

@@ -32,7 +32,7 @@ public class CheckoutController {
     public ResponseEntity<CheckoutResponse> checkout(@Valid @RequestBody CheckoutRequest request) {
         var cart = cartService.getCartById(request.getCartId())
                 .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
-        
+
         if (cart.getCartItems().isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
         }

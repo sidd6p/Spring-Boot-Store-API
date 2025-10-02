@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
-                                                                       HttpServletRequest request) {
+                                                                      HttpServletRequest request) {
         var errors = new HashMap<String, String>();
 
         exception.getBindingResult().getAllErrors().forEach((error) -> {
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException exception,
-                                                                    HttpServletRequest request) {
+                                                                   HttpServletRequest request) {
         var errors = new HashMap<String, String>();
 
         exception.getConstraintViolations().forEach(violation -> {
@@ -111,7 +111,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception,
-                                                                           HttpServletRequest request) {
+                                                                          HttpServletRequest request) {
         String parameterName = exception.getName();
         Class<?> requiredType = exception.getRequiredType();
         Object rejectedValue = exception.getValue();
@@ -151,7 +151,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException exception,
-                                                                       HttpServletRequest request) {
+                                                                      HttpServletRequest request) {
         String errorMessage = "Invalid request body";
 
         // Extract more specific error message if available
@@ -193,7 +193,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException exception,
-                                                                HttpServletRequest request) {
+                                                               HttpServletRequest request) {
         String resourcePath = exception.getResourcePath();
         String errorMessage = String.format("Endpoint not found: %s", resourcePath);
         log.warn("Resource not found: {}", resourcePath);
@@ -220,7 +220,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException exception,
-                                                                   HttpServletRequest request) {
+                                                                  HttpServletRequest request) {
         String method = exception.getMethod();
         String[] supportedMethods = exception.getSupportedMethods();
 
@@ -252,7 +252,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException exception,
-                                                                        HttpServletRequest request) {
+                                                                       HttpServletRequest request) {
         String errorMessage = "Invalid email or password";
         log.warn("Authentication failed: {}", exception.getMessage());
 
@@ -278,7 +278,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException exception,
-                                                                         HttpServletRequest request) {
+                                                                        HttpServletRequest request) {
         log.warn("Illegal argument: {}", exception.getMessage());
 
         var errorResponse = ErrorResponse.builder()
@@ -303,7 +303,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException exception,
-                                                                      HttpServletRequest request) {
+                                                                     HttpServletRequest request) {
         log.warn("Illegal state: {}", exception.getMessage());
 
         var errorResponse = ErrorResponse.builder()
@@ -328,7 +328,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException exception,
-                                                                       HttpServletRequest request) {
+                                                                      HttpServletRequest request) {
         log.warn("Element not found: {}", exception.getMessage());
 
         var errorResponse = ErrorResponse.builder()
@@ -353,7 +353,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException exception,
-                                                                      HttpServletRequest request) {
+                                                                     HttpServletRequest request) {
         log.warn("Access denied: {}", exception.getMessage());
 
         var errorResponse = ErrorResponse.builder()
@@ -379,7 +379,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception exception,
-                                                                 HttpServletRequest request) {
+                                                                HttpServletRequest request) {
         String errorMessage = "An unexpected error occurred";
         log.error("Unexpected error occurred: {}", exception.getMessage(), exception);
 
