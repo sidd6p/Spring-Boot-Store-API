@@ -43,3 +43,27 @@ email:
   smtp:
     hostUrl: https://smtp.example.com
     port: 587
+
+# Actuator configuration to expose application info including version
+management:
+  info:
+    build:
+      enabled: true
+    env:
+      enabled: true
+  endpoint:
+    info:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: info,health
+
+# Application info that will be shown in actuator/info endpoint
+info:
+  app:
+    name: '@project.name@'
+    version: '@project.version@'
+    description: '@project.description@'
+    groupId: '@project.groupId@'
+    artifactId: '@project.artifactId@'

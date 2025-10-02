@@ -89,6 +89,9 @@ docker-compose up -d
 Once the application is running, you can access the interactive API documentation through Swagger UI:
 `http://localhost:8080/swagger-ui/index.html`
 
+### Actuator Endpoints
+`http://localhost:8080/actuator/info`
+
 ### Postman Collection
 
 A complete Postman collection is included in the repository for testing all API
