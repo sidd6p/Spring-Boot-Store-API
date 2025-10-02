@@ -21,6 +21,7 @@ spring:
     refreshTokenExpiration: 864000
 stripe:
   secretKey: ${STRIPE_SECRET_KEY}
+  webhookSecret: ${STRIPE_WEBHOOK_SECRET}
   enabled: true
   timeout: 1000
   apiUrl: https://api.stripe.com
