@@ -6,6 +6,7 @@ import com.github.sidd6p.store.dtos.CheckoutResponse;
 import com.github.sidd6p.store.services.CheckoutService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,6 @@ public class CheckoutController {
     @PostMapping
     public ResponseEntity<CheckoutResponse> checkout(@Valid @RequestBody CheckoutRequest request) {
         CheckoutResponse response = checkoutService.processCheckout(request.getCartId());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

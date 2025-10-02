@@ -368,6 +368,39 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles RuntimeException thrown when a runtime error occurs.
+     * <p>
+     * This is a catch-all for RuntimeExceptions that provides more specific error messages
+     * for payment-related failures and other runtime issues.
+     * <p>
+     * Returns 500 Internal Server Error with a descriptive error message.
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException exception,
+                                                                HttpServletRequest request) {
+        String errorMessage = exception.getMessage();
+
+        // Check if it's a payment-related error
+        if (errorMessage != null && errorMessage.contains("payment session")) {
+            log.error("Payment processing error: {}", errorMessage, exception);
+            errorMessage = "Payment processing failed. Please try again later.";
+        } else {
+            log.error("Runtime error occurred: {}", errorMessage, exception);
+            errorMessage = errorMessage != null ? errorMessage : "An unexpected error occurred";
+        }
+
+        var errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    /**
      * Handles any unhandled exceptions that are not specifically caught elsewhere.
      * <p>
      * This acts as a fallback to ensure that even unexpected exceptions return
