@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CheckoutResponse {
     private Long orderId;
+    private String checkoutUrl;
 }

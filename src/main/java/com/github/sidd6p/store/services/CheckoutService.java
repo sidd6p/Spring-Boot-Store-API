@@ -5,6 +5,9 @@ import com.github.sidd6p.store.entities.OrderItems;
 import com.github.sidd6p.store.entities.OrderStatus;
 import com.github.sidd6p.store.entities.Orders;
 import com.github.sidd6p.store.repositories.OrderRepository;
+import com.stripe.exception.StripeException;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +24,7 @@ public class CheckoutService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public CheckoutResponse processCheckout(UUID cartId) {
+    public CheckoutResponse processCheckout(UUID cartId) throws StripeException {
         var cart = cartService.getCartById(cartId)
                 .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
@@ -59,9 +62,32 @@ public class CheckoutService {
 
         // Save again to persist order items
         orderRepository.save(savedOrder);
+        var builder = SessionCreateParams.builder()
+                .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setSuccessUrl("https://localhost:8080/success")
+                .setCancelUrl("https://localhost:8080/cancel");
+        order.getOrderItems().forEach(item -> {
+            var lineItem = SessionCreateParams.LineItem.builder()
+                    .setQuantity(Long.valueOf(item.getQuantity()))
+                    .setPriceData(
+                            SessionCreateParams.LineItem.PriceData.builder()
+                                    .setCurrency("inr")
+                                    .setUnitAmountDecimal((long) (item.getUnitPrice()))
+                                    .setProductData(
+                                            SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                    .setName(item.getProduct().getName())
+                                                    .build()
+                                    )
+                                    .build()
+                    )
+                    .build();
+            builder.addLineItem(lineItem);
+        });
+        var session = Session.create(builder.build());
+
         cartService.clearCart(cart.getId());
 
-        return new CheckoutResponse(savedOrder.getId());
+        return new CheckoutResponse(savedOrder.getId(), session.getUrl());
     }
 }
 
