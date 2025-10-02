@@ -8,8 +8,12 @@ import com.github.sidd6p.store.entities.OrderStatus;
 import com.github.sidd6p.store.gateways.PayementGateway;
 import com.github.sidd6p.store.repositories.CartRepository;
 import com.github.sidd6p.store.repositories.OrderRepository;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import lombok.AllArgsConstructor;
+import com.stripe.model.PaymentIntent;
+import com.stripe.net.Webhook;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +23,16 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CheckoutService {
     private final CartRepository cartRepository;
     private final CartService cartService;
     private final AuthService authService;
     private final OrderRepository orderRepository;
     private final PayementGateway payementGateway;
+
+    @Value("${stripe.webhookSecret}")
+    private String webhookSecret;
 
     @Transactional
     public CheckoutResponse processCheckout(UUID cartId) {
@@ -104,5 +111,70 @@ public class CheckoutService {
             throw new RuntimeException("An error occurred during checkout: " + ex.getMessage(), ex);
         }
     }
-}
 
+    @Transactional
+    public void handleWebhookEvent(String signature, String payload) throws SignatureVerificationException {
+        var event = Webhook.constructEvent(payload, signature, webhookSecret);
+
+        switch (event.getType()) {
+            case "payment_intent.succeeded" -> {
+                try {
+                    var eventDataObject = event.getData().getObject();
+                    if (eventDataObject instanceof PaymentIntent paymentIntent) {
+                        String orderId = paymentIntent.getMetadata().get("order_id");
+                        if (orderId != null) {
+                            orderRepository.findById(Long.valueOf(orderId)).ifPresent(order -> {
+                                order.setStatus(OrderStatus.PAID);
+                                orderRepository.save(order);
+                            });
+                            System.out.println("Payment succeeded for order: " + orderId + ", event: " + event.getId());
+                        } else {
+                            System.out.println("No order_id metadata found in PaymentIntent for event: " + event.getId());
+                        }
+                    } else {
+                        System.out.println("Event data object is not a PaymentIntent for event: " + event.getId());
+                        System.out.println("Actual object type: " + (eventDataObject != null ? eventDataObject.getClass().getSimpleName() : "null"));
+                        System.out.println("Event data: " + event.getData());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error processing payment_intent.succeeded: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            case "payment_intent.payment_failed" -> {
+                try {
+                    var eventDataObject = event.getData().getObject();
+                    if (eventDataObject instanceof PaymentIntent paymentIntent) {
+                        String orderId = paymentIntent.getMetadata().get("order_id");
+                        if (orderId != null) {
+                            orderRepository.findById(Long.valueOf(orderId)).ifPresent(order -> {
+                                order.setStatus(OrderStatus.FAILED);
+                                orderRepository.save(order);
+                            });
+                            System.out.println("Payment failed for order: " + orderId + ", event: " + event.getId());
+                        } else {
+                            System.out.println("No order_id metadata found in PaymentIntent for event: " + event.getId());
+                        }
+                    } else {
+                        System.out.println("Event data object is not a PaymentIntent for event: " + event.getId());
+                        System.out.println("Actual object type: " + (eventDataObject != null ? eventDataObject.getClass().getSimpleName() : "null"));
+                        System.out.println("Event data: " + event.getData());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error processing payment_intent.payment_failed: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            case "payment_intent.created" -> {
+                System.out.println("Payment intent created for event: " + event.getId());
+            }
+            case "charge.succeeded" -> {
+                System.out.println("Charge succeeded for event: " + event.getId());
+            }
+            case "charge.updated" -> {
+                System.out.println("Charge updated for event: " + event.getId());
+            }
+            default -> System.out.println("Unhandled event type: " + event.getType());
+        }
+    }
+}

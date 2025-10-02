@@ -19,7 +19,8 @@ public class StripePayementGateway implements PayementGateway {
         var builder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl("https://localhost:8080/success")
-                .setCancelUrl("https://localhost:8080/cancel");
+                .setCancelUrl("https://localhost:8080/cancel")
+                .putMetadata("order_id", String.valueOf(order.getId()));
 
         // Use savedOrder and convert amounts to smallest currency unit (paise for INR)
         order.getOrderItems().forEach(item -> {
