@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.sidd6p</groupId>
     <artifactId>store</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>store</name>
     <description>Educational project to learn Java Spring Boot by following Code with Mosh tutorials.</description>
     <url/>
