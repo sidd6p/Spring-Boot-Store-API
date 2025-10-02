@@ -59,13 +59,14 @@ git clone https://github.com/sidd6p/Spring-Boot-Store-API.git
 cd Spring-Boot-Store-API
 ```
 
-2. Set environment variables in .env file:
+2. Set environment variables by creating .env file in root directory:
 
 ```bash
 MYSQL_USER=your_username
 MYSQL_PASSWORD=your_password
 MYSQL_ROOT_PASSWORD=your_root_password
 JWT_SECRET=random_string_for_jwt
+STRIPE_SECRET_KEY=your_stripe_secret_key
 ```
 
 3. Start the services with Docker:
@@ -85,13 +86,16 @@ docker-compose up -d
 
 ### Swagger UI
 
-Once the application is running, you can access the interactive API documentation through Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+Once the application is running, you can access the interactive API documentation through Swagger UI:
+`http://localhost:8080/swagger-ui/index.html`
 
 ### Postman Collection
 
-A complete Postman collection is included in the repository for testing all API endpoints: [Spring-Boot-Store-API.postman_collection.json](./Spring-Boot-Store-API.postman_collection.json)
+A complete Postman collection is included in the repository for testing all API
+endpoints: [Spring-Boot-Store-API.postman_collection.json](./Spring-Boot-Store-API.postman_collection.json)
 
 To use the Postman collection:
+
 1. Import the collection file into Postman
 2. Set up environment variables as needed
 3. Test all endpoints with pre-configured requests

@@ -20,6 +20,7 @@ spring:
     accessTokenExpiration: 600
     refreshTokenExpiration: 864000
 stripe:
+  secretKey: ${STRIPE_SECRET_KEY}
   enabled: true
   timeout: 1000
   apiUrl: https://api.stripe.com
