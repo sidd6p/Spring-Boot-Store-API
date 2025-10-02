@@ -14,6 +14,7 @@ following [Code with Mosh Spring Boot tutorials](https://members.codewithmosh.co
 - [Learning Focus](#learning-focus)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
 - [Learning Resources](#learning-resources)
 - [Contact](#contact)
 
@@ -64,6 +65,7 @@ cd Spring-Boot-Store-API
 MYSQL_USER=your_username
 MYSQL_PASSWORD=your_password
 MYSQL_ROOT_PASSWORD=your_root_password
+JWT_SECRET=random_string_for_jwt
 ```
 
 3. Start the services with Docker:
@@ -79,6 +81,21 @@ docker-compose up -d
 ./mvnw spring-boot:run
 ```
 
+## API Documentation
+
+### Swagger UI
+
+Once the application is running, you can access the interactive API documentation through Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
+### Postman Collection
+
+A complete Postman collection is included in the repository for testing all API endpoints: [Spring-Boot-Store-API.postman_collection.json](./Spring-Boot-Store-API.postman_collection.json)
+
+To use the Postman collection:
+1. Import the collection file into Postman
+2. Set up environment variables as needed
+3. Test all endpoints with pre-configured requests
+
 ## Learning Resources
 
 This project is based on learning from:
@@ -91,4 +108,3 @@ This project is based on learning from:
 
 - **GitHub**: [@sidd6p](https://github.com/sidd6p)
 - **Email**: siddpurwar@gmail.com
-
