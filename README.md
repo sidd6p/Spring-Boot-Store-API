@@ -90,6 +90,7 @@ Once the application is running, you can access the interactive API documentatio
 `http://localhost:8080/swagger-ui/index.html`
 
 ### Actuator Endpoints
+
 `http://localhost:8080/actuator/info`
 
 ### Postman Collection

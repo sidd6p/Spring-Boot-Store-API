@@ -94,8 +94,9 @@ public class CheckoutService {
         try {
             var checkoutSession = payementGateway.createCheckoutSession(savedOrder);
 
-            // DO NOT clear cart here - only clear after successful payment confirmation
-            // Cart will be cleared in the webhook when payment succeeds
+            // Clear the cart immediately after successful checkout session creation
+            // The order has been created with its own order items, so the cart can be cleared
+            cartService.clearCart(cartId);
 
             return new CheckoutResponse(savedOrder.getId(), checkoutSession.getUrl());
 
@@ -124,17 +125,6 @@ public class CheckoutService {
                             orderRepository.findById(Long.valueOf(orderId)).ifPresent(order -> {
                                 order.setStatus(OrderStatus.PAID);
                                 orderRepository.save(order);
-
-                                // Clear the cart now that payment has succeeded
-                                if (order.getCartId() != null) {
-                                    try {
-                                        cartService.clearCart(order.getCartId());
-                                        System.out.println("Cart cleared successfully for order: " + orderId);
-                                    } catch (Exception e) {
-                                        System.out.println("Failed to clear cart for order: " + orderId + ", error: " + e.getMessage());
-                                        // Don't fail the payment processing if cart clearing fails
-                                    }
-                                }
                             });
                             System.out.println("Payment succeeded for order: " + orderId + ", event: " + event.getId());
                         } else {

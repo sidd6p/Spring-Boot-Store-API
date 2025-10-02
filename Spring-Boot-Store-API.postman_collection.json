@@ -39,12 +39,6 @@
             "method": "POST",
             "header": [
               {
-                "key": "x-auth-token",
-                "value": "asfgfdv",
-                "description": "Custom auth token (required by backend)",
-                "type": "string"
-              },
-              {
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
@@ -1194,12 +1188,6 @@
             },
             "method": "PUT",
             "header": [
-              {
-                "key": "x-auth-token",
-                "value": "asfgfdv",
-                "description": "Custom auth token (required by backend)",
-                "type": "string"
-              },
               {
                 "key": "Content-Type",
                 "value": "application/json",
