@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -24,6 +25,9 @@ public class Order {
 
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
+
+    @Column(name = "cart_id")
+    private UUID cartId;
 
     @Column(name = "status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)

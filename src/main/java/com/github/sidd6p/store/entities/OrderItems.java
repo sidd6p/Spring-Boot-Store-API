@@ -19,9 +19,6 @@ public class OrderItems {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
-
     @Column(name = "product_id", nullable = false)
     private Integer productId;
 
@@ -35,7 +32,7 @@ public class OrderItems {
     private BigDecimal totalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)

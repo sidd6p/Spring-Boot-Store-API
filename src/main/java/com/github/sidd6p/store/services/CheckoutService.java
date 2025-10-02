@@ -57,20 +57,18 @@ public class CheckoutService {
                     }
                     return item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                 })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 
         var order = Order.builder()
                 .customerId(currentUser.getId())
+                .cartId(cartId)  // Store the cart ID in the order
                 .totalPrice(totalPrice)
                 .status(OrderStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .orderItems(new ArrayList<>())
                 .build();
 
-        // Save order first to get the ID
-        var savedOrder = orderRepository.save(order);
-
-        // Now create order items with the saved order ID and maintain the product relationship
+        // Create order items and establish the relationship
         cart.getCartItems().forEach(item -> {
             var product = item.getProduct();
             if (product == null) {
@@ -78,36 +76,36 @@ public class CheckoutService {
             }
 
             var orderItem = OrderItems.builder()
-                    .orderId(savedOrder.getId())
                     .productId(product.getId())
                     .unitPrice(product.getPrice())
                     .quantity(item.getQuantity())
                     .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                    .order(order)  // Set the order relationship instead of orderId
                     .build();
 
             // Set the product relationship on the order item so it's available in the gateway
             orderItem.setProduct(product);
-            savedOrder.getOrderItems().add(orderItem);
+            order.getOrderItems().add(orderItem);
         });
 
-        // Save again to persist order items
-        var finalOrder = orderRepository.save(savedOrder);
+        // Save the order with all its items
+        var savedOrder = orderRepository.save(order);
 
         try {
-            var checkoutSession = payementGateway.createCheckoutSession(finalOrder);
+            var checkoutSession = payementGateway.createCheckoutSession(savedOrder);
 
-            // Only clear cart after successful payment session creation
-            cartService.clearCart(cart.getId());
+            // DO NOT clear cart here - only clear after successful payment confirmation
+            // Cart will be cleared in the webhook when payment succeeds
 
-            return new CheckoutResponse(finalOrder.getId(), checkoutSession.getUrl());
+            return new CheckoutResponse(savedOrder.getId(), checkoutSession.getUrl());
 
         } catch (StripeException ex) {
             // If Stripe session creation fails, delete the order to maintain data consistency
-            orderRepository.delete(finalOrder);
+            orderRepository.delete(savedOrder);
             throw new RuntimeException("Failed to create payment session: " + ex.getMessage(), ex);
         } catch (Exception ex) {
             // Handle any other unexpected errors
-            orderRepository.delete(finalOrder);
+            orderRepository.delete(savedOrder);
             throw new RuntimeException("An error occurred during checkout: " + ex.getMessage(), ex);
         }
     }
@@ -126,6 +124,17 @@ public class CheckoutService {
                             orderRepository.findById(Long.valueOf(orderId)).ifPresent(order -> {
                                 order.setStatus(OrderStatus.PAID);
                                 orderRepository.save(order);
+
+                                // Clear the cart now that payment has succeeded
+                                if (order.getCartId() != null) {
+                                    try {
+                                        cartService.clearCart(order.getCartId());
+                                        System.out.println("Cart cleared successfully for order: " + orderId);
+                                    } catch (Exception e) {
+                                        System.out.println("Failed to clear cart for order: " + orderId + ", error: " + e.getMessage());
+                                        // Don't fail the payment processing if cart clearing fails
+                                    }
+                                }
                             });
                             System.out.println("Payment succeeded for order: " + orderId + ", event: " + event.getId());
                         } else {

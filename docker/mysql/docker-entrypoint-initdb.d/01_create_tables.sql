@@ -100,12 +100,15 @@ CREATE TABLE
   `orders` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     `customer_id` bigint NOT NULL,
+    `cart_id` binary(16) NULL,
     `status` varchar(20) NOT NULL,
     `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `total_price` decimal(10, 2) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `orders_customer_id_fk` (`customer_id`),
-    CONSTRAINT `orders_customer_id_fk` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    KEY `orders_cart_id_fk` (`cart_id`),
+    CONSTRAINT `orders_customer_id_fk` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `orders_cart_id_fk` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`) ON DELETE SET NULL
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE
