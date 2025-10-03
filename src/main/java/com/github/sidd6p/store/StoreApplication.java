@@ -4,70 +4,85 @@ import com.github.sidd6p.store.entities.*;
 import com.github.sidd6p.store.notification.NotificationManager;
 import com.github.sidd6p.store.order.OrderManager;
 import com.github.sidd6p.store.repositories.UserRepository;
-import com.github.sidd6p.store.services.ProductService;
-import com.github.sidd6p.store.services.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/*
+ * KEY CONCEPTS:
+ *
+ * 1. ENTITY vs REPOSITORY:
+ *    - User (class) = Data model representing a database row
+ *    - UserRepository (interface) = Tool for database operations
+ *      • Just an interface - you write NO implementation code
+ *      • extends JpaRepository<User, Long> means: manages User entities with Long as primary key type
+ *      • Spring Data JPA auto-generates implementation at runtime (the proxy)
+ *      • Provides methods: save(), findById(), findAll(), delete(), existsByEmail(), etc.
+ *
+ * 2. WHY SINGLETON BEANS DON'T MIX DATA:
+ *    Repositories are STATELESS - they don't store data, only provide methods
+ *
+ *    Example:
+ *    Thread-A: repository.save(user1) -> sends to DB immediately
+ *    Thread-B: repository.save(user2) -> sends to DB immediately
+ *    Thread-C: repository.findById(5) -> queries DB, returns result
+ *
+ *    No data mixing because:
+ *    - Repository doesn't hold user1, user2, or any User objects
+ *    - Data lives in: database (permanent) and local variables (temporary)
+ *    - Repository = bank teller (shared), Data = money (stored in vault, not in teller)
+ *
+ *    STATELESS (safe for singleton): Service, Repository, Controller - only logic, no data storage
+ *    STATEFUL (needs prototype): Shopping cart, user session - stores changing data
+ */
+
+// @SpringBootApplication: Combines @Configuration, @EnableAutoConfiguration, and @ComponentScan
+// Enables auto-configuration, component scanning, and Java-based configuration in one annotation
 @SpringBootApplication
 public class StoreApplication {
 
     public static void main(String[] args) {
+        // SpringApplication.run() bootstraps the application, creates ApplicationContext, and manages beans
+        // ConfigurableApplicationContext provides access to the Spring container and its managed beans
         ConfigurableApplicationContext context = SpringApplication.run(StoreApplication.class, args);
         executeStoreOperations(context);
         executeRepositoryOperations(context);
-        executeUserServices(context);
-        executeProductServices(context);
     }
 
 
-    public static void executeUserServices(ConfigurableApplicationContext context) {
-        var userServices = context.getBean(UserService.class);
-        userServices.showEntityStates();
-        userServices.showRelatedEntities();
-        userServices.fetchAddress();
-        userServices.persistRelated();
-        userServices.deleteRelated();
-    }
-
-    public static void executeProductServices(ConfigurableApplicationContext context) {
-        var productServices = context.getBean(ProductService.class);
-        productServices.find("aptop");
-        productServices.findByIDBetweenOrderbyName(1, 10);
-        productServices.findProductsByPriceRange(new BigDecimal("1000.0"), new BigDecimal("5000.0"));
-        productServices.findByExample();
-        productServices.fetchSortedProductsByPrice();
-        productServices.fetchPaginatedProducts(0, 5);
-    }
 
 
+
+    /*
+     * SPRING DATA JPA: Repository Pattern & Dynamic Proxies
+     *
+     * How it works:
+     * 1. Define repository interface (e.g., UserRepository extends JpaRepository) - no implementation needed
+     * 2. At startup, Spring scans for repository interfaces and creates proxy classes dynamically
+     * 3. Proxy class contains logic for all repository methods (save, findAll, findById, etc.)
+     * 4. All operations delegate to the underlying JPA EntityManager
+     * 5. When you call context.getBean(UserRepository.class), you get the proxy instance
+     * 6. Method calls (e.g., save()) are intercepted by the proxy, which executes the database operation
+     *
+     */
     public static void executeRepositoryOperations(ConfigurableApplicationContext context) {
-		/*
-		   Spring Data JPA uses a powerful mechanism to provide repository implementations at runtime.
-		   When you define an interface like UserRepository, you do not need to provide its implementation.
-		   At application startup, Spring scans for repository interfaces and automatically creates a proxy class that implements these interfaces.
-		   This proxy class is generated dynamically and contains the logic to handle all the repository methods (like save, findAll, etc.) by delegating them to the underlying JPA EntityManager.
-		   When you request the UserRepository bean from the Spring context, you receive an instance of this proxy class (the proxy object).
-		   Any method call you make (such as save()) is intercepted by the proxy, which then executes the appropriate database operation.
-		   This approach allows you to work with repositories as if they were regular objects, while Spring handles all the implementation details behind the scenes.
-		*/
-        // Get the UserRepository bean from the Spring context. This is a proxy object created by Spring at runtime.
+        // context.getBean() retrieves a bean (managed object) from the Spring IoC container
+        // The bean IS a proxy object - in Spring, "bean" means any container-managed object
+        // So: proxy object = bean, they're the same thing, just different terminology
         var userRepository = context.getBean(UserRepository.class);
 
-        // Print the proxy object. This is the actual instance returned by Spring, which implements the UserRepository interface.
+        // Proxy object: Shows the actual instance Spring created (not your interface)
         System.out.println("Proxy object: " + userRepository);
 
-        // Print the proxy class. This shows the dynamically generated class that Spring uses to implement the interface.
+        // Proxy class: Reveals the dynamically generated class (e.g., SimpleJpaRepository$Proxy)
         System.out.println("Proxy class: " + userRepository.getClass());
 
-        // Print the methods declared in the proxy class. These are the methods you can call on the repository.
+        // Proxy methods: All methods available on the proxy, including inherited ones
         System.out.println("Proxy methods: " + Arrays.toString(userRepository.getClass().getDeclaredMethods()));
 
         var user1 = User.builder()
@@ -86,69 +101,41 @@ public class StoreApplication {
 
     }
 
+    // BEAN SCOPES: Singleton vs Prototype
     public static void executeStoreOperations(ConfigurableApplicationContext context) {
-        // Even though we call getBean(OrderService.class) twice, Spring returns the same instance
-        // because OrderService is a singleton-scoped bean by default.
+        // SINGLETON SCOPE (default): Multiple getBean() calls return the same instance
+        // Single shared instance per Spring IoC container - stateless and efficient
         var orderService = context.getBean(OrderManager.class);
         var orderService2 = context.getBean(OrderManager.class);
 //		orderService.placeOrder();
 //		orderService2.placeOrder();
 
-        // Because NotificationManager is defined as a prototype-scoped bean in Appconfig.java,
-        // each call to getBean(NotificationManager.class) returns a new instance.
+        // PROTOTYPE SCOPE: Each getBean() call creates a new instance
+        // Use for stateful beans where each client needs independent state
         var notificationManager = context.getBean(NotificationManager.class);
         var notificationManager2 = context.getBean(NotificationManager.class);
 //		notificationManager.notify("Order placed successfully!", "siddpurwar@gmail.com");
 //		notificationManager2.notify("Order placed successfully!", "siddpurwar@gmail.com");
 
+        // OBJECT CONSTRUCTION: Three approaches
+        // 1. Default constructor + setters (verbose but explicit)
         var user1 = new User();
-        user1.setEmail("siddpurwar@gmail.com");
-        System.out.println("User1: " + user1);
 
+        // 2. All-args constructor (error-prone with many parameters)
         var user2 = new User(null, null, "siddpurwar6@gmail.com", null, null, new ArrayList<>(), new HashSet<>(), null);
-        System.out.println("User2: " + user2);
 
-        // We are not using the 'new' keyword here because Lombok's @Builder generates a builder() method.
-        // The builder pattern provides a flexible and readable way to construct objects, especially with many fields.
-        // Instead of calling a constructor directly, we use User.builder()...build() to set properties fluently and create the object.
+        // 3. LOMBOK BUILDER PATTERN: 
+        // @Builder annotation generates a builder() static method and inner Builder class at compile-time
+        // No 'new' keyword needed - User.builder() returns the Builder instance
         var user3 = User.builder()
                 .name("John Doe")
                 .email("john.doe@example.com")
                 .password("password123")
                 .build();
-        var address1 = Address.builder()
-                .zip("12345")
-                .city("New York")
-                .street("123 Main St")
-                .user(user3)
-                .build();
-        user3.addAddress(address1);
-        System.out.println("User3: " + user3);
-        user3.removeAddress(address1);
-        System.out.println("User3: " + user3);
+        
 
 
-        var tag1 = new Tag("tag1");
-        user1.addTag(tag1);
-        System.out.println("User1: " + user1);
-        user1.removeTag(tag1);
-        System.out.println("User1: " + user1);
-
-
-        var profile = Profile.builder()
-                .bio("This is a sample bio.")
-                .phoneNumber("123-456-7890")
-                .dateOfBirth(Date.valueOf("1990-01-01"))
-                .user(user1)
-                .loyaltyPoints(100)
-                .build();
-
-        user2.setProfile(profile);
-        profile.setUser(user2);
-        System.out.println("User2: " + user2);
-
-
-//		context.close(); // This closes the application context, releasing all resources and beans managed by Spring.
+//	context.close(); // Shuts down ApplicationContext, destroys singleton beans, and releases resources
     }
 
 }
