@@ -20,15 +20,29 @@ following [Code with Mosh Spring Boot tutorials](https://members.codewithmosh.co
 
 ## Learning Focus
 
-This project emphasizes:
+This project emphasizes modern Java and Spring Boot development:
+*Note: This is a learning project focused on mastering Java fundamentals and Spring Boot best practices.*
 
-- **Entity Relationships** - One-to-One, One-to-Many, Many-to-Many mappings
-- **Spring Data JPA** - Repository interfaces, custom queries, and database operations
-- **Dependency Injection** - Spring's IoC container and bean management
-- **Configuration Management** - YAML configuration and environment variables
-- **Database Integration** - MySQL setup, schema validation, and data persistence
 
-*Note: This is a learning project focused on backend concepts rather than a production-ready e-commerce API.*
+### Java Core Concepts
+- **Object-Oriented Programming** - Interfaces, abstract classes, inheritance, and polymorphism
+- **Custom Annotations** - Creating and implementing custom validators (`@LowerCase`)
+- **Collections & Streams** - Working with lists, maps, and stream operations
+- **Exception Handling** - Custom exceptions and global error handling patterns
+- **Generics** - Type-safe collections and method implementations
+
+### Spring Boot Framework
+- **RESTful API Design** - Controllers, request/response handling, and HTTP methods
+- **Spring Security** - JWT authentication, custom filters, stateless sessions, and role-based access control
+- **Dependency Injection** - IoC container, bean lifecycle, and component scanning
+- **Configuration Management** - Profile-based configuration (dev/prod), externalized properties
+- **Validation Framework** - Bean validation with custom validators
+- **DTO Pattern & MapStruct** - Object mapping and separation of concerns
+- **Design Patterns** - Strategy pattern (notifications), Gateway pattern (payments), Builder pattern
+- **Global Exception Handling** - Centralized error handling with `@ControllerAdvice`
+- **JPA & Database** - Spring Data JPA interfaces for database operations
+
+
 
 ## Tech Stack
 
@@ -45,41 +59,43 @@ This project emphasizes:
 
 ### Prerequisites
 
-- Java 17
-- Maven 3.6+
 - Docker and Docker Compose
-- MySQL (or use Docker setup)
 
-### Quick Start with Docker
+### Quick Start with Docker Compose
 
-1. Clone the repository:
+1. **Clone the repository:**
 
 ```bash
 git clone https://github.com/sidd6p/Spring-Boot-Store-API.git
 cd Spring-Boot-Store-API
 ```
 
-2. Set environment variables by creating .env file in root directory:
+2. **Create `.env` file in the root directory:**
 
-```bash
-MYSQL_USER=your_username
-MYSQL_PASSWORD=your_password
-MYSQL_ROOT_PASSWORD=your_root_password
-JWT_SECRET=random_string_for_jwt
-STRIPE_SECRET_KEY=your_stripe_secret_key
+```env
+MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_USER=storeuser
+MYSQL_PASSWORD=storepassword
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret_here
 ```
 
-3. Start the services with Docker:
+3. **Start everything with Docker Compose:**
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-4. Run the application:
+This will:
+- Start MySQL database with initialization scripts
+- Build and start the Spring Boot application
+- Expose the API at `http://localhost:8080`
+
+4. **Stop the application:**
 
 ```bash
-./mvnw clean install
-./mvnw spring-boot:run
+docker-compose down
 ```
 
 ## API Documentation

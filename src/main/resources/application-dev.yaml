@@ -4,10 +4,6 @@
 spring:
   application:
     name: store-dev
-  datasource:
-    url: jdbc:mysql://localhost:3307/store_api?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
   jpa:
     show-sql: true  # Show SQL statements in the console for debugging
     hibernate:

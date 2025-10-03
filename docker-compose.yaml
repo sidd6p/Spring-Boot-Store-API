@@ -1,18 +1,27 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:latest
-    container_name: my-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: store_api
     ports:
-      - "3307:3306"  # Map host port 3307 to container port 3306
+      - "3307:3306"
     volumes:
       # Mount local initialization scripts to MySQL container's entrypoint directory
       # This allows SQL scripts in ./docker/mysql/docker-entrypoint-initdb.d/ to be
       # automatically executed when the MySQL container starts up for database initialization
       - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
