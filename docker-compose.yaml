@@ -1,3 +1,8 @@
+# To run only MySQL database: docker-compose up -d
+# To run both MySQL database and the app: docker-compose --profile with-app up -d
+
+
+
 services:
   mysql:
     image: mysql:latest
@@ -15,6 +20,8 @@ services:
       - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   app:
+    profiles:
+      - with-app
     build: .
     env_file:
       - .env
