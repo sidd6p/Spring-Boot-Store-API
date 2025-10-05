@@ -15,16 +15,7 @@ import java.util.HashSet;
 
 /*
  * KEY CONCEPTS:
- *
- * 1. ENTITY vs REPOSITORY:
- *    - User (class) = Data model representing a database row
- *    - UserRepository (interface) = Tool for database operations
- *      • Just an interface - you write NO implementation code
- *      • extends JpaRepository<User, Long> means: manages User entities with Long as primary key type
- *      • Spring Data JPA auto-generates implementation at runtime (the proxy)
- *      • Provides methods: save(), findById(), findAll(), delete(), existsByEmail(), etc.
- *
- * 2. WHY SINGLETON BEANS DON'T MIX DATA:
+ * 2. WHY repository DON'T MIX DATA:
  *    Repositories are STATELESS - they don't store data, only provide methods
  *
  *    Example:
