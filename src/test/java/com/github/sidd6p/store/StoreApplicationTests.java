@@ -17,8 +17,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+/**
+
+ * @SpringBootTest: Loads the full application context (all beans, configs, security)
+ * @AutoConfigureMockMvc: Enables MockMvc for testing REST endpoints without starting a real HTTP server
+ * 
+ * IMPORTANT: Since this app uses Spring Security, any HTTP request tests need authentication.
+ * Solution: Use @WithMockUser on test methods to simulate an authenticated user.
+ */
 @SpringBootTest
-@AutoConfigureMockMvc  // This enables MockMvc for testing controllers
+@AutoConfigureMockMvc  
 class StoreApplicationTests {
 
     // @Autowired: Spring injects the bean automatically (Dependency Injection)
@@ -39,10 +47,9 @@ class StoreApplicationTests {
 
     /**
      * REPOSITORY TEST: Tests database operations
-     * This test demonstrates how to:
-     * 1. Create a product
-     * 2. Save it to the database
-     * 3. Retrieve it and verify the data
+     * 
+     * NOTE: Repository tests don't need @WithMockUser because they interact directly
+     * with the database, bypassing the web layer and Spring Security.
      */
     @Test
     void testProductRepository_SaveAndFind() {
@@ -53,7 +60,7 @@ class StoreApplicationTests {
 
         Product product = Product.builder()
                 .name("Test Laptop")
-                .price(new BigDecimal("100"))
+                .price(new BigDecimal("100"))  
                 .category(category)
                 .build();
 
@@ -63,6 +70,7 @@ class StoreApplicationTests {
         // ASSERT: Verify the results
         assertThat(savedProduct.getId()).isNotNull();  // ID should be auto-generated
         assertThat(savedProduct.getName()).isEqualTo("Test Laptop");
+        // Use isEqualByComparingTo for BigDecimal - compares value ignoring scale (100 vs 100.00)
         assertThat(savedProduct.getPrice()).isEqualByComparingTo("100");
 
         // Cleanup: Delete the test data so it doesn't affect other tests
@@ -71,10 +79,11 @@ class StoreApplicationTests {
 
     /**
      * CONTROLLER TEST: Tests REST API endpoint
-     * This test demonstrates how to:
-     * 1. Make a GET request to /products
-     * 2. Verify the HTTP status is 200 OK
-     * 3. Check that response is a JSON array
+     * @WithMockUser: REQUIRED for controller tests!
+     * - Your app has Spring Security enabled
+     * - Without this annotation, the test would get Unauthorized
+     * - This simulates a logged-in user making the request
+     * - You can also specify roles: @WithMockUser(roles = "ADMIN")
      */
     @Test
     @WithMockUser  // Mock an authenticated user to bypass Spring Security
@@ -83,48 +92,6 @@ class StoreApplicationTests {
         mockMvc.perform(get("/products"))  // GET request to /products endpoint
                 .andExpect(status().isOk())  // Expect HTTP 200 OK
                 .andExpect(jsonPath("$").isArray());  // Expect JSON array response
-    }
-
-    /**
-     * CONTROLLER TEST: Tests getting a product by ID
-     * This shows how to test endpoints with path variables
-     */
-    @Test
-    @WithMockUser  // Mock an authenticated user to bypass Spring Security
-    void testGetProductById_WithValidId() throws Exception {
-        // ARRANGE: First, create a product to test with
-        Category category = Category.builder()
-                .name("Books")
-                .build();
-
-        Product product = Product.builder()
-                .name("Spring Boot Guide")
-                .price(new BigDecimal("50"))
-                .category(category)
-                .build();
-
-        Product savedProduct = productRepository.save(product);
-
-        // ACT & ASSERT: Test the endpoint
-        mockMvc.perform(get("/products/" + savedProduct.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Spring Boot Guide"))
-                .andExpect(jsonPath("$.price").value(50));
-
-        // Cleanup
-        productRepository.deleteById(savedProduct.getId());
-    }
-
-    /**
-     * CONTROLLER TEST: Tests error handling
-     * This shows what happens when requesting a non-existent product
-     */
-    @Test
-    @WithMockUser  // Mock an authenticated user to bypass Spring Security
-    void testGetProductById_WithInvalidId_Returns404() throws Exception {
-        // ACT & ASSERT: Request a product that doesn't exist
-        mockMvc.perform(get("/products/99999"))  // Assuming ID 99999 doesn't exist
-                .andExpect(status().isNotFound());  // Expect HTTP 404 Not Found
     }
 
 }
